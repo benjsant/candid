@@ -33,16 +33,16 @@ assets se lisent.
 
 ## Étape 2 : entrée par partage (le cœur)
 
-- [ ] Déclarer l'application comme cible de partage Android (`ACTION_SEND`,
+- [x] Déclarer l'application comme cible de partage Android (`ACTION_SEND`,
       `text/plain`) dans le manifeste
-- [ ] Écran de réception : afficher le texte et l'URL reçus, laisser corriger le
+- [x] Écran de réception : afficher le texte et l'URL reçus, laisser corriger le
       titre et l'entreprise si l'extraction est imparfaite
-- [ ] Porter `norm`, `canonTitle`, `canonCompany`, le hash SHA256 depuis
+- [x] Porter `norm`, `canonTitle`, `canonCompany`, le hash SHA256 depuis
       `reference/offer-utils.mjs` vers `lib/domain/hash.dart`
-- [ ] Porter le scoring local depuis `reference/offer-utils.mjs` vers
+- [x] Porter le scoring local depuis `reference/offer-utils.mjs` vers
       `lib/domain/scoring.dart`
-- [ ] Reprendre les cas de test de `reference/offer-utils.test.mjs` en tests Dart
-- [ ] Enregistrer l'offre en base, avec dédup par hash
+- [x] Reprendre les cas de test de `reference/offer-utils.test.mjs` en tests Dart
+- [x] Enregistrer l'offre en base, avec dédup par hash
 
 **Acceptation :** partager une offre depuis l'application LinkedIn officielle crée
 l'entrée en base, avec un titre et une entreprise corrects, et un score cohérent.

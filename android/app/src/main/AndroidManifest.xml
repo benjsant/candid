@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="candid"
+        android:label="Candid"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -23,6 +23,18 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <!-- Cible de partage : c'est LA porte d'entrée du produit. Depuis
+                 l'application LinkedIn ou Indeed, ou depuis le navigateur sur une
+                 offre WTTJ, « Partager » puis « Candid » transmet directement le
+                 texte et l'URL de l'offre. Cela remplace le scraping (impossible
+                 sur mobile) et le copier-coller manuel du texte des pages
+                 dynamiques, dont l'extraction par URL revient vide. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

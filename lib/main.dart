@@ -1,34 +1,51 @@
 /// Candid : l'assistant de candidature qui ne brode jamais.
 ///
-/// Étape 1 (socle) : base locale, coffre-fort des clés, écran de réglages.
-/// Les écrans d'offres et de suivi arrivent aux étapes suivantes (voir TASKS.md).
+/// Étapes couvertes (voir TASKS.md) :
+///  - 1 : base locale, coffre-fort des clés, réglages ;
+///  - 2 : cible de partage, normalisation, hash, scoring local.
+/// L'agent (4) et le rendu PDF (3) viennent ensuite.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import 'core/secrets.dart';
 import 'data/database.dart';
+import 'data/offers_repository.dart';
+import 'sources/shared_text.dart';
+import 'ui/offers_screen.dart';
+import 'ui/receive_share_screen.dart';
 import 'ui/settings_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(CandidApp(database: AppDatabase(), secrets: Secrets()));
+  final db = AppDatabase();
+  runApp(
+    CandidApp(
+      repository: OffersRepository(db),
+      secrets: Secrets(),
+    ),
+  );
 }
 
 class CandidApp extends StatelessWidget {
-  const CandidApp({super.key, required this.database, required this.secrets});
+  const CandidApp({
+    super.key,
+    required this.repository,
+    required this.secrets,
+  });
 
-  final AppDatabase database;
+  final OffersRepository repository;
   final Secrets secrets;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF2F6F4E));
     return MaterialApp(
       title: 'Candid',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2F6F4E)),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(colorScheme: scheme, useMaterial3: true),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF2F6F4E),
@@ -36,15 +53,19 @@ class CandidApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: HomeScreen(database: database, secrets: secrets),
+      home: HomeScreen(repository: repository, secrets: secrets),
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.database, required this.secrets});
+  const HomeScreen({
+    super.key,
+    required this.repository,
+    required this.secrets,
+  });
 
-  final AppDatabase database;
+  final OffersRepository repository;
   final Secrets secrets;
 
   @override
@@ -53,17 +74,52 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _tab = 0;
+  StreamSubscription<List<SharedMediaFile>>? _shareSub;
+
+  @override
+  void initState() {
+    super.initState();
+    // Deux cas à couvrir : l'application était fermée quand on a partagé
+    // (getInitialMedia), ou elle tournait déjà en fond (getMediaStream).
+    ReceiveSharingIntent.instance.getInitialMedia().then((media) {
+      _handleShare(media);
+      ReceiveSharingIntent.instance.reset();
+    });
+    _shareSub =
+        ReceiveSharingIntent.instance.getMediaStream().listen(_handleShare);
+  }
+
+  @override
+  void dispose() {
+    _shareSub?.cancel();
+    super.dispose();
+  }
+
+  void _handleShare(List<SharedMediaFile> media) {
+    // Une offre est du texte ou un lien. Le reste (image, vidéo) ne nous
+    // concerne pas : on l'ignore plutôt que d'échouer bruyamment.
+    final text = media
+        .where((m) =>
+            m.type == SharedMediaType.text || m.type == SharedMediaType.url)
+        .map((m) => m.path)
+        .join('\n')
+        .trim();
+    if (text.isEmpty || !mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ReceiveShareScreen(
+          shared: parseSharedText(text),
+          repository: widget.repository,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      const _Placeholder(
-        icon: Icons.inbox_outlined,
-        title: 'Offres',
-        detail:
-            'Partagez une offre depuis LinkedIn, Indeed ou votre navigateur : '
-            'elle arrivera ici (étape 2).',
-      ),
+      OffersScreen(repository: widget.repository),
       const _Placeholder(
         icon: Icons.timeline_outlined,
         title: 'Suivi',
