@@ -103,8 +103,10 @@ CV), `check_accroche`, et `no_dash`.
 - **Framework** : Flutter (Dart), cible Android (téléphone et tablette).
 - **Base locale** : `drift` (SQLite). Même schéma que le PostgreSQL d'origine :
   `search_profiles`, `offers`, `companies`, `applications`,
-  `generated_documents`, `profile`. Pas de pgvector : si la dédup sémantique est
-  ajoutée un jour, la similarité cosinus se calcule en Dart.
+  `generated_documents`. La table `profile` n'est pas portée : le profil
+  candidat vit dans `assets/cv/*.json`, données statiques embarquées. Pas de
+  pgvector : si la dédup sémantique est ajoutée un jour, la similarité cosinus
+  se calcule en Dart.
 - **LLM** : DeepSeek (API compatible OpenAI, base URL `https://api.deepseek.com`,
   modèle `deepseek-chat` par défaut).
 - **Sources** : API France Travail (OAuth client_credentials), La Bonne

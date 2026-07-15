@@ -6,7 +6,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -30,7 +30,13 @@
                  offre WTTJ, « Partager » puis « Candid » transmet directement le
                  texte et l'URL de l'offre. Cela remplace le scraping (impossible
                  sur mobile) et le copier-coller manuel du texte des pages
-                 dynamiques, dont l'extraction par URL revient vide. -->
+                 dynamiques, dont l'extraction par URL revient vide.
+
+                 launchMode="singleTask" est celui que demande le plugin
+                 receive_sharing_intent : avec singleTop, un partage reçu
+                 pendant que l'application est en tâche de fond peut ouvrir
+                 une seconde instance et perdre l'intent. À confirmer sur
+                 appareil réel (critère d'acceptation de l'étape 2). -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>

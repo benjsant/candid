@@ -24,7 +24,8 @@ vient en dernier.
       (les autres s'ajoutent à l'étape qui les utilise : `pdf` et `printing` en 3,
       `workmanager` et `flutter_local_notifications` en 6)
 - [x] Schéma `drift` porté depuis `reference/schema.sql` (offers, companies,
-      applications, generated_documents, search_profiles, profile)
+      applications, generated_documents, search_profiles ; la table `profile`
+      n'est pas portée, le profil candidat vit dans `assets/cv/*.json`)
 - [x] Écran de réglages : saisie et stockage des clés dans le secure storage
 - [x] Chargement des assets (prompt système, templates de lettres, données CV)
 
@@ -43,6 +44,11 @@ assets se lisent.
       `lib/domain/scoring.dart`
 - [x] Reprendre les cas de test de `reference/offer-utils.test.mjs` en tests Dart
 - [x] Enregistrer l'offre en base, avec dédup par hash
+- [ ] Lors du test sur appareil : capturer les textes **réellement** partagés
+      par LinkedIn, Indeed, WTTJ et HelloWork, et les figer en fixtures dans
+      `test/shared_text_test.dart` (le harnais `capturesReelles` y est prêt).
+      Les regex actuelles sont des suppositions ; seules des captures réelles
+      permettent de les ajuster sans casser ce qui marche.
 
 **Acceptation :** partager une offre depuis l'application LinkedIn officielle crée
 l'entrée en base, avec un titre et une entreprise corrects, et un score cohérent.
@@ -64,14 +70,23 @@ Partager deux fois la même offre ne crée qu'une entrée.
 ## Étape 4 : l'agent
 
 - [ ] `lib/agent/llm.dart` : client DeepSeek (compatible OpenAI), avec la clé lue
-      dans le secure storage
+      dans le secure storage. **Concevoir pour le cache DeepSeek dès le départ** :
+      le préfixe constant (prompt système + cv-index) toujours en tête des
+      messages, dans le même ordre, et tout ce qui varie (l'offre) à la fin.
+      Les tokens en cache coûtent une fraction du prix et répondent plus vite ;
+      c'est difficile à retrofitter une fois les 5 nœuds écrits.
 - [ ] `lib/agent/graph.dart` : porter les 5 nœuds de `reference/graph.py`
-      (analyze, research, accroche, judge, validate) en fonctions `async`
+      (analyze, research, accroche, judge, validate) en fonctions `async`.
+      Le grounding de `research` (`recherche-entreprises.api.gouv.fr`) est sans
+      clé et sans OAuth : il se porte tel quel en un appel dio. Ne pas le
+      remplacer par « demander au LLM ce qu'il sait de l'entreprise » : c'est
+      lui qui ancre l'accroche dans des faits vérifiables.
 - [ ] `lib/agent/guards.dart` : porter `no_dash`, `check_accroche`,
       `sanitize_personalisation` (garde-fous **non négociables**)
 - [ ] Tests des garde-fous : une personnalisation qui invente une compétence
       absente du CV doit être rejetée
-- [ ] Plafond d'appels quotidiens à l'agent (garde-fou de coût)
+- [ ] Plafond d'appels quotidiens à l'agent (garde-fou de coût), **visible dans
+      l'interface** (« 3/5 aujourd'hui ») plutôt qu'un refus silencieux
 - [ ] Brancher : une offre partagée produit un CV et une lettre personnalisés
 
 **Acceptation :** sur une offre réelle, la lettre passe les garde-fous (rien
@@ -84,6 +99,9 @@ l'entreprise.
       accepted), dates
 - [ ] Marquer une candidature comme envoyée après l'avoir envoyée soi-même
 - [ ] Rappel de relance
+- [ ] Export de la base (partage du fichier SQLite ou d'un JSON) : contrairement
+      au Postgres du projet Docker, tout l'historique vit sur un téléphone qui
+      peut se perdre. Une heure de travail qui protège des mois de suivi.
 
 **Acceptation :** le cycle complet, du partage de l'offre à « envoyée », tient
 sans quitter l'application.
@@ -94,6 +112,9 @@ sans quitter l'application.
 - [ ] `lib/sources/lba.dart` : La Bonne Alternance
 - [ ] `lib/sources/normalize.dart` : porter depuis `reference/sources.mjs`
 - [ ] Écran de liste : offres triées par score, triage au balayage
+- [ ] « Re-scorer » : recalculer les scores des offres en attente quand le
+      profil de recherche change (les scores sont figés à l'insertion ; la
+      logique est pure, c'est trois lignes)
 - [ ] `workmanager` : collecte une fois par jour
 - [ ] Notification locale : « 12 nouvelles offres, dont 3 au-dessus de 75 »
 

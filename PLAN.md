@@ -48,7 +48,8 @@ lib/
 │   └── notifications.dart   # flutter_local_notifications
 ├── data/
 │   ├── database.dart        # drift : offers, companies, applications,
-│   │                        # generated_documents, search_profiles, profile
+│   │                        # generated_documents, search_profiles
+│   │                        # (le profil candidat vit dans assets/cv/)
 │   └── dao/                 # requêtes (offres à trier, suivi, digest)
 ├── sources/
 │   ├── france_travail.dart  # OAuth client_credentials + /offres/search
@@ -184,6 +185,10 @@ dans `flutter_secure_storage` (Keystore Android).
 **Le coût DeepSeek** est inchangé, puisque c'est le même nombre d'appels. Prévois
 juste un garde-fou côté application (par exemple, ne pas lancer l'agent sur plus
 de N offres par jour), parce que sur mobile un bouton se presse plus vite.
+DeepSeek fait par ailleurs du cache automatique sur les préfixes constants :
+construire les messages avec le prompt système et le cv-index toujours en tête,
+dans le même ordre, et l'offre à la fin, fait payer le gros du contexte au tarif
+« cache hit » sur chacun des 5 nœuds du graphe.
 
 **La collecte en arrière-plan** est soumise aux restrictions de batterie
 d'Android, et les intervalles ne sont jamais garantis à la minute près. Pour une
