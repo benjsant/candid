@@ -1,0 +1,28 @@
+{
+  "name": "Benjamin Santrisse",
+  "title": "Développeur Backend Python (API, IA appliquée)",
+  "email": "santrissebenjamin@gmail.com",
+  "phone": "",
+  "location": "Métropole Valenciennoise + Lilloise",
+  "links": {
+    "github": "https://github.com/benjsant",
+    "linkedin": "https://www.linkedin.com/in/benjamin-santrisse/",
+    "portfolio": "https://benjamin-santrisse.vercel.app"
+  },
+  "summary": "Développeur Python spécialisé en IA et backend, certifié Développeur IA RNCP niveau 6 à l'issue d'une reconversion. Conçoit des projets concrets et déployés : agents LLM, pipelines MLOps, ETL et APIs FastAPI.",
+  "residence": "Marly (59)",
+  "permis": "B + véhicule",
+  "mobility_label": "Mobilité Valenciennes / Lille · Télétravail possible",
+  "alternance": {
+    "formation_visee": "",
+    "rythme": "",
+    "date_debut": ""
+  },
+  "salary": {
+    "min": null,
+    "ideal": null
+  },
+  "soft_skills": [],
+  "strengths": [],
+  "achievements": []
+}

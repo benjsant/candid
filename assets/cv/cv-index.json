@@ -1,0 +1,78 @@
+{
+  "skills": [
+    "Machine Learning",
+    "MLOps",
+    "Pandas",
+    "NumPy",
+    "Scikit-learn",
+    "MLflow",
+    "XGBoost",
+    "Deep Learning (CNN)",
+    "ETL / Data Engineering",
+    "Prefect",
+    "Scrapy",
+    "Jupyter",
+    "LLMs",
+    "RAG",
+    "Agents IA (ReAct, tool-calling)",
+    "DeepSeek",
+    "Prompt engineering",
+    "MCP (Model Context Protocol)",
+    "Python",
+    "JavaScript",
+    "PHP",
+    "HTML/CSS",
+    "Java",
+    "FastAPI",
+    "Django",
+    "Symfony",
+    "React",
+    "Next.js",
+    "JEE",
+    "Hibernate",
+    "MySQL",
+    "PostgreSQL",
+    "MongoDB",
+    "pgvector",
+    "HBase",
+    "Docker",
+    "Git",
+    "Linux",
+    "Node.js",
+    "CI/CD GitHub Actions",
+    "Bash / Shell",
+    "n8n",
+    "TCP/IP",
+    "DNS",
+    "HTTP/HTTPS & REST",
+    "SSH (durcissement)",
+    "Pare-feu (ufw / iptables)",
+    "Réseaux Docker",
+    "VPN / WireGuard"
+  ],
+  "projects": [
+    {
+      "id": "job-hunter",
+      "name": "Job Hunter - pipeline de candidature assisté par IA"
+    },
+    {
+      "id": "infinidex",
+      "name": "InfiniDex - Pokédex augmenté par IA"
+    },
+    {
+      "id": "predictiondex",
+      "name": "PredictionDex - prédiction de combats Pokémon"
+    },
+    {
+      "id": "audiomancy",
+      "name": "Audiomancy - génération de playlists assistée par IA"
+    }
+  ],
+  "experiences": [
+    {
+      "id": "caf-du-nord",
+      "role": "Développeur Web Symfony - Stages successifs",
+      "company": "CAF du Nord - Agence de Valenciennes"
+    }
+  ]
+}

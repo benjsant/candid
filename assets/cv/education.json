@@ -1,0 +1,34 @@
+{
+  "education": [
+    {
+      "id": "certification-developpeur-ia",
+      "degree": "Certification Développeur IA - RNCP niveau 6 (bac+3/4)",
+      "school": "Simplon, Lille",
+      "location": "",
+      "start": "2025",
+      "end": "2026",
+      "date": "2025-26 · obtenue en mars 2026",
+      "details": ""
+    },
+    {
+      "id": "licence-pro-sio",
+      "degree": "Licence Pro SIO, option Développement",
+      "school": "ISTV de Valenciennes (UVHC)",
+      "location": "",
+      "start": "2018",
+      "end": "2019",
+      "date": "2018-19",
+      "details": ""
+    },
+    {
+      "id": "bts-sio-option",
+      "degree": "BTS SIO, option SLAM",
+      "school": "Lycée Henri Wallon, Valenciennes",
+      "location": "",
+      "start": "2015",
+      "end": "2017",
+      "date": "2015-17",
+      "details": ""
+    }
+  ]
+}

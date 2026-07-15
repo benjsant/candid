@@ -1,0 +1,20 @@
+{
+  "experiences": [
+    {
+      "id": "caf-du-nord",
+      "role": "Développeur Web Symfony - Stages successifs",
+      "company": "CAF du Nord - Agence de Valenciennes",
+      "location": "",
+      "start": "2016",
+      "end": "2019",
+      "date": "Mai 2016 - Mai 2019 · 6 mois cumulés (24 sem.)",
+      "bullets": [
+        "Développement et intégration d'interfaces web avec Symfony et Bootstrap dans des applications internes",
+        "Participation au développement d'une plateforme de gestion des espaces de travail",
+        "Analyse des besoins et mise en œuvre de solutions techniques",
+        "Maintenance et évolution des applications existantes",
+        "Stack : PHP, Symfony, Bootstrap, Git, PostgreSQL"
+      ]
+    }
+  ]
+}
