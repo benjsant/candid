@@ -7,8 +7,9 @@ Contexte projet pour Claude Code. Lis ce fichier en début de session.
 1. Lis ce fichier en entier.
 2. Lis `PLAN.md` : l'architecture et l'ordre de construction, avec les critères
    d'acceptation de chaque étape.
-3. Ouvre `TASKS.md` : le plan de build ordonné. Exécute les tâches dans l'ordre,
-   coche-les, vérifie les critères d'acceptation.
+3. Ouvre `TASKS.md` : le plan de build ordonné, avec **l'état d'avancement daté
+   en tête**. Exécute les tâches dans l'ordre, coche-les, vérifie les critères
+   d'acceptation.
 4. Ne committe jamais de clé API. Ne demande jamais à inventer une info perso :
    demande à l'utilisateur.
 
@@ -41,7 +42,7 @@ Le parcours central, celui qui définit le produit :
 ```
 offre partagée depuis LinkedIn / Indeed / WTTJ (cible de partage Android)
   → normalisation + hash + scoring local
-  → agent DeepSeek (analyze → research → accroche → judge → validate)
+  → agent LLM multi-fournisseurs (analyze → research → accroche → judge → validate)
   → CV + lettre en PDF sur l'appareil
   → relecture humaine, puis envoi manuel par l'utilisateur
 ```
@@ -71,15 +72,17 @@ Ce qui se réutilise **sans réécriture**, recopié dans `assets/` :
 - `assets/cv/*.json` : les données du CV maître (profil, compétences, projets,
   expériences, formation).
 
-Ce qui se **porte** (la logique existe, il faut la traduire en Dart) :
+Ce qui se **porte** (la logique existe, il faut la traduire en Dart). Les
+originaux sont copiés dans `reference/` pour travailler sans le dépôt Docker :
 
-| Source (projet Docker) | Destination (ici) |
-|---|---|
-| `workflows/lib/offer-utils.mjs` | `lib/domain/` (norm, canonTitle, hash, scoring) |
-| `workflows/lib/sources.mjs` | `lib/sources/normalize.dart` |
-| `services/agent-langgraph/agent/graph.py` | `lib/agent/graph.dart` |
-| `db/schema.sql` | `lib/data/database.dart` (drift) |
-| `cv/template-ats.astro` | `lib/render/cv_document.dart` |
+| Source (projet Docker) | Destination (ici) | État |
+|---|---|---|
+| `workflows/lib/offer-utils.mjs` | `lib/domain/` (norm, canonTitle, hash, scoring) | ✅ porté, tests repris |
+| `db/schema.sql` | `lib/data/database.dart` (drift, index inclus) | ✅ porté |
+| partage Android (sans équivalent Docker) | `lib/sources/shared_text.dart` | ✅ codé |
+| `cv/template-ats.astro` | `lib/render/cv_document.dart` | ⏳ étape 3 |
+| `services/agent-langgraph/agent/graph.py` | `lib/agent/graph.dart` | ⏳ étape 4 |
+| `workflows/lib/sources.mjs` | `lib/sources/normalize.dart` | ⏳ étape 6 |
 
 ## Philosophie (garde-fous non négociables)
 
@@ -151,6 +154,36 @@ message clair. Elle ne plante pas.
   d'acceptation. On ne passe à l'étape suivante qu'après vérification sur un
   appareil réel, pas seulement sur l'émulateur.
 
+## Cycle de développement
+
+```bash
+flutter analyze                                      # zéro warning attendu
+flutter test                                         # toute la suite (rapide)
+dart run build_runner build --delete-conflicting-outputs
+                                                     # OBLIGATOIRE après toute
+                                                     # modification de database.dart
+flutter run                                          # sur l'appareil branché (USB)
+```
+
+Le SDK Flutter est sur la machine (`~/distrobox/flutter_sdk/flutter/bin`). Le
+SDK **Android** est le prérequis des commandes sur appareil (voir TASKS étape 0).
+
+## Vérification sur appareil (avec Claude)
+
+Claude ne voit pas l'écran du téléphone ni la fenêtre scrcpy. Le protocole qui
+marche : **scrcpy pour l'humain** (miroir temps réel, manipulation), **captures
+adb pour Claude** :
+
+```bash
+adb exec-out screencap -p > /tmp/candid-capture.png   # puis lecture du PNG
+```
+
+Claude peut lancer cette commande lui-même (téléphone en USB, débogage activé)
+et lire l'image pour valider chaque critère d'acceptation « sur appareil » :
+écran de réception d'un partage, rendu PDF, tri de la liste. En profiter, à ce
+moment-là, pour capturer les textes réellement partagés par LinkedIn/Indeed/
+WTTJ/HelloWork et remplir `capturesReelles` dans `test/shared_text_test.dart`.
+
 ## Pièges connus
 
 - **Les tâches de fond.** Android exécute `workmanager` en théorie, mais Xiaomi,
@@ -159,8 +192,19 @@ message clair. Elle ne plante pas.
   étape 6 et pas en étape 2 : elle ne doit pas bloquer le reste.
 - **Le rendu du CV.** Chercher la parité au pixel près avec le PDF Astro est un
   puits sans fond, invisible pour un recruteur. Un template propre suffit.
-- **Le coût DeepSeek.** Sur mobile, un bouton se presse plus vite que sur un PC.
-  Prévoir un garde-fou (plafond d'appels à l'agent par jour).
+- **Le coût LLM.** Sur mobile, un bouton se presse plus vite que sur un PC.
+  Prévoir un garde-fou (plafond d'appels à l'agent par jour, visible dans
+  l'interface), et concevoir les messages pour le cache de préfixe (stable
+  d'abord, variable ensuite ; voir TASKS étape 4).
+- **`database.dart` sans régénération.** Modifier le schéma sans relancer
+  build_runner casse la compilation de façon confuse. Et dès qu'une première
+  installation réelle existera sur le téléphone, tout changement de schéma
+  exigera d'incrémenter `schemaVersion` et d'écrire la migration (aujourd'hui
+  on est encore libre : version 1, aucune installation).
+- **Les regex du parseur de partage sont des suppositions.** Elles n'ont jamais
+  vu un vrai partage LinkedIn/Indeed. Ne pas les « améliorer » à l'aveugle :
+  d'abord collecter des captures réelles (harnais `capturesReelles` prêt dans
+  les tests), ensuite ajuster.
 
 ## Tâches typiques pour Claude Code
 
