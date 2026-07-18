@@ -107,8 +107,15 @@ CV), `check_accroche`, et `no_dash`.
   candidat vit dans `assets/cv/*.json`, données statiques embarquées. Pas de
   pgvector : si la dédup sémantique est ajoutée un jour, la similarité cosinus
   se calcule en Dart.
-- **LLM** : DeepSeek (API compatible OpenAI, base URL `https://api.deepseek.com`,
-  modèle `deepseek-chat` par défaut).
+- **LLM** : multi-fournisseurs derrière une interface `LlmClient`, tous en HTTP
+  compatible OpenAI (voir PLAN.md « Le LLM »). **DeepSeek** par défaut
+  (`https://api.deepseek.com`, `deepseek-chat`) ; **OpenRouter** en mode gratuit
+  et respectueux des données (option d'entraînement désactivée) ; **Gemini** en
+  option, réservé aux usages non sensibles (scoring, dédup) car son offre
+  gratuite entraîne sur les requêtes. Modèle configurable, jamais codé en dur.
+  Claude/Anthropic n'est pas un fournisseur : l'abonnement Pro ne donne pas
+  d'accès API (facturé au token, à part) ; il sert à *construire* Candid via
+  Claude Code, pas à le faire tourner.
 - **Sources** : API France Travail (OAuth client_credentials), La Bonne
   Alternance. Plus la cible de partage Android, qui est la voie d'entrée
   principale.
@@ -124,8 +131,9 @@ Tout ce qui est compilé dans un APK est extractible en quelques minutes. Il n'y
 donc **aucun `.env`, aucune clé en dur dans le code, aucune clé dans les assets**.
 
 L'utilisateur saisit lui-même, au premier lancement, dans l'écran de réglages :
-sa clé DeepSeek, ses identifiants France Travail (client id et secret), sa clé La
-Bonne Alternance. Elles sont stockées dans `flutter_secure_storage`.
+la clé de son fournisseur LLM actif (DeepSeek, OpenRouter ou Gemini) et le modèle
+choisi, ses identifiants France Travail (client id et secret), sa clé La Bonne
+Alternance. Elles sont stockées dans `flutter_secure_storage`.
 
 Si une clé manque, la fonctionnalité concernée se désactive proprement avec un
 message clair. Elle ne plante pas.

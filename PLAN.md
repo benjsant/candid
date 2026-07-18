@@ -60,7 +60,9 @@ lib/
 │   ├── dedup.dart
 │   └── scoring.dart         # port de offer-utils.mjs + llm-scoring.mjs
 ├── agent/
-│   ├── llm.dart             # client DeepSeek (compatible OpenAI)
+│   ├── llm.dart             # interface LlmClient (multi-fournisseurs)
+│   ├── providers/           # deepseek.dart, openrouter.dart, gemini.dart
+│   │                        # (tous compatibles OpenAI : même forme d'appel)
 │   ├── graph.dart           # analyze → research → accroche → judge → validate
 │   └── guards.dart          # no_dash, sanitize_personalisation, check_accroche
 ├── render/
@@ -80,6 +82,43 @@ assets/
 ├── letters/*.md                     # les 7 templates, inchangés
 └── cv/*.json                        # profile, skills, projects, experiences…
 ```
+
+## Le LLM : multi-fournisseurs, un seul contrat
+
+L'agent ne connaît pas son fournisseur. Il parle à une interface `LlmClient`
+(une méthode : envoyer un prompt système + un message, recevoir un texte ou un
+JSON). Trois implémentations derrière, toutes en HTTP compatible OpenAI, donc
+quasi identiques : seuls l'URL de base, la clé et l'identifiant de modèle
+changent.
+
+**Ce n'est pas de la sur-ingénierie.** Les fournisseurs de LLM sont volatils
+(prix, quotas gratuits, modèles qui vont et viennent). Une seule couche
+d'abstraction rend le choix configurable au lieu de le figer dans le code, et
+c'est un point d'architecture solide à montrer en portfolio.
+
+| Fournisseur | Rôle | Pourquoi |
+|---|---|---|
+| **DeepSeek** | moteur par défaut | pas cher, simple, déjà la référence du projet Docker |
+| **OpenRouter** | mode gratuit / respectueux | offre gratuite réelle ; ne journalise pas les prompts et ne route pas vers des fournisseurs qui entraînent sur les données, **tant que l'option d'entraînement reste désactivée**. Convient même à la lettre (données perso) |
+| **Gemini** | option, données non sensibles | offre gratuite généreuse, mais l'offre gratuite **utilise les requêtes pour entraîner** les modèles Google. À réserver au scoring et à la dédup, jamais au CV ni à la lettre |
+| **Mammouth** | option, si déjà abonné | agrégateur français, API compatible OpenAI, bonne confidentialité (pas d'entraînement, non-rétention, RGPD). Mais l'abonnement à 10 €/mois n'inclut que ~2 $ de crédits API puis paiement à l'usage avec marge : intéressant seulement si on paie déjà les 10 € pour le chat, pas comme moteur d'app |
+
+Règles qui découlent de ce choix, à respecter dans le code :
+
+- **L'identifiant de modèle est configurable, jamais codé en dur.** La liste des
+  modèles gratuits d'OpenRouter change au fil du temps ; l'utilisateur choisit
+  le modèle dans les réglages.
+- **Le mode OpenRouter garde l'option d'entraînement désactivée par défaut**, et
+  ne propose que des modèles accessibles sans elle. C'est ce qui protège les
+  données personnelles.
+- **Anthropic (Claude) n'est PAS un fournisseur ici.** L'abonnement Pro ne donne
+  pas d'accès API : l'API se facture au token, séparément. Si un jour on l'ajoute,
+  ce sera un mode « clé API personnelle » explicitement payant, pas le défaut.
+  L'abonnement Pro sert à *construire* Candid (via Claude Code), pas à le faire
+  tourner.
+
+Le fournisseur actif et son modèle sont un réglage, au même titre que les clés.
+Une clé absente désactive proprement le fournisseur correspondant.
 
 ## Le graphe de l'agent
 
