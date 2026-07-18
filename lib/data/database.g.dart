@@ -3651,6 +3651,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ApplicationsTable applications = $ApplicationsTable(this);
   late final $GeneratedDocumentsTable generatedDocuments =
       $GeneratedDocumentsTable(this);
+  late final Index idxOffersStatus = Index(
+    'idx_offers_status',
+    'CREATE INDEX idx_offers_status ON offers (status)',
+  );
+  late final Index idxOffersCreatedAt = Index(
+    'idx_offers_created_at',
+    'CREATE INDEX idx_offers_created_at ON offers (created_at)',
+  );
+  late final Index idxOffersCompanyCanon = Index(
+    'idx_offers_company_canon',
+    'CREATE INDEX idx_offers_company_canon ON offers (company_canon)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3661,6 +3673,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     companies,
     applications,
     generatedDocuments,
+    idxOffersStatus,
+    idxOffersCreatedAt,
+    idxOffersCompanyCanon,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([

@@ -61,18 +61,10 @@ class OffersRepository {
       return const SaveResult(SaveOutcome.excluded);
     }
 
-    final existing = await (_db.select(_db.offers)
-          ..where((o) => o.hash.equals(annotated.hash)))
-        .getSingleOrNull();
-    if (existing != null) {
-      return SaveResult(
-        SaveOutcome.duplicate,
-        offerId: existing.id,
-        score: existing.score,
-      );
-    }
-
-    final id = await _db.into(_db.offers).insert(
+    // Un seul INSERT OR IGNORE : la contrainte UNIQUE sur le hash fait la
+    // dédup, sans SELECT préalable ni fenêtre de course. Renvoie null si la
+    // ligne existait déjà ; on ne paie le SELECT que dans ce cas-là.
+    final row = await _db.into(_db.offers).insertReturningOrNull(
           OffersCompanion.insert(
             source: source,
             sourceId: Value(sourceId),
@@ -87,9 +79,21 @@ class OffersRepository {
             salary: Value(salary),
             score: Value(annotated.score),
           ),
+          mode: InsertMode.insertOrIgnore,
         );
 
-    return SaveResult(SaveOutcome.saved, offerId: id, score: annotated.score);
+    if (row == null) {
+      final existing = await (_db.select(_db.offers)
+            ..where((o) => o.hash.equals(annotated.hash)))
+          .getSingle();
+      return SaveResult(
+        SaveOutcome.duplicate,
+        offerId: existing.id,
+        score: existing.score,
+      );
+    }
+
+    return SaveResult(SaveOutcome.saved, offerId: row.id, score: annotated.score);
   }
 
   /// Les offres à trier, les mieux notées d'abord.

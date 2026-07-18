@@ -9,10 +9,22 @@ d'abord la chaîne « une offre en entrée, un dossier de candidature en sortie 
 qui est le cœur du produit. La collecte automatique, la partie la plus fragile,
 vient en dernier.
 
+> **État au 17/07/2026** : étapes 1 et 2 codées, 28 tests verts, analyse
+> propre. Optimisations structurelles appliquées : index SQLite (parité avec
+> le schéma Postgres), insertion `INSERT OR IGNORE` par hash (dédup sans
+> SELECT préalable), `IndexedStack` (les onglets gardent leur état). Critères
+> d'acceptation « sur appareil » en attente du SDK Android.
+
 ## Étape 0 : prérequis (à faire par Benjamin)
 
-- [ ] Installer le SDK Flutter et vérifier `flutter doctor`
+- [x] SDK Flutter installé (3.44.6, le projet compile et les tests passent)
+- [ ] Installer le SDK **Android** (JDK + cmdline-tools) : c'est LE bloquant
+      actuel, sans lui pas d'APK ni de test sur appareil
 - [ ] Activer le mode développeur et le débogage USB sur le téléphone
+- [ ] Vérification visuelle avec Claude : scrcpy sert à l'humain (miroir de
+      l'écran) ; pour que Claude « voie » le téléphone, passer par
+      `adb exec-out screencap -p > capture.png` (adb est fourni avec le SDK
+      Android et embarqué dans scrcpy), puis lui faire lire le PNG
 - [ ] Récupérer les clés : DeepSeek, France Travail (client id + secret), LBA
       (elles ne vont **pas** dans le dépôt, elles seront saisies dans l'application)
 

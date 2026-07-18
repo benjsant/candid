@@ -76,6 +76,18 @@ class _HomeScreenState extends State<HomeScreen> {
   int _tab = 0;
   StreamSubscription<List<SharedMediaFile>>? _shareSub;
 
+  // Construits UNE fois : avec un IndexedStack, chaque onglet garde son état
+  // (l'écran Réglages ne relit pas le secure storage à chaque bascule).
+  late final List<Widget> _pages = [
+    OffersScreen(repository: widget.repository),
+    const _Placeholder(
+      icon: Icons.timeline_outlined,
+      title: 'Suivi',
+      detail: 'Vos candidatures et leurs réponses (étape 5).',
+    ),
+    SettingsScreen(secrets: widget.secrets),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -118,19 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      OffersScreen(repository: widget.repository),
-      const _Placeholder(
-        icon: Icons.timeline_outlined,
-        title: 'Suivi',
-        detail: 'Vos candidatures et leurs réponses (étape 5).',
-      ),
-      SettingsScreen(secrets: widget.secrets),
-    ];
-
     return Scaffold(
       appBar: AppBar(title: Text(['Offres', 'Suivi', 'Réglages'][_tab])),
-      body: pages[_tab],
+      body: IndexedStack(index: _tab, children: _pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (i) => setState(() => _tab = i),

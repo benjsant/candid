@@ -67,6 +67,13 @@ class SearchProfiles extends Table {
 /// `hash` = SHA256 du titre, de l'entreprise et du lieu canonicalisés. C'est la
 /// clé de déduplication : une offre déjà connue est ignorée.
 /// `companyCanon` sert aux rapprochements entre sources.
+///
+/// Index : parité avec le schéma Postgres d'origine (idx_offers_*). Sans eux,
+/// `watchInbox()` (filtre statut + tri score/date) balaierait toute la table à
+/// chaque rafraîchissement du stream, à chaque écriture.
+@TableIndex(name: 'idx_offers_status', columns: {#status})
+@TableIndex(name: 'idx_offers_created_at', columns: {#createdAt})
+@TableIndex(name: 'idx_offers_company_canon', columns: {#companyCanon})
 class Offers extends Table {
   IntColumn get id => integer().autoIncrement()();
 

@@ -45,6 +45,25 @@ void main() {
     expect(await db.select(db.offers).get(), hasLength(1));
   });
 
+  test('les index de parité Postgres existent (statut, date, entreprise)',
+      () async {
+    // Sans eux, watchInbox() balaierait toute la table à chaque écriture.
+    final rows = await db
+        .customSelect(
+          "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'idx_%'",
+        )
+        .get();
+    final names = rows.map((r) => r.read<String>('name')).toSet();
+    expect(
+      names,
+      containsAll({
+        'idx_offers_status',
+        'idx_offers_created_at',
+        'idx_offers_company_canon',
+      }),
+    );
+  });
+
   test('supprimer une candidature supprime ses documents (cascade)', () async {
     final appId = await db.into(db.applications).insert(
           ApplicationsCompanion.insert(poste: const Value('Dev IA')),
