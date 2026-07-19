@@ -32,7 +32,20 @@ class CaptureReelle {
 /// vide, et chaque application (LinkedIn, Indeed, WTTJ, HelloWork) formate son
 /// partage différemment. Une entrée par application, plus si les formats
 /// varient. Voir la tâche dédiée de l'étape 2 dans TASKS.md.
-const capturesReelles = <CaptureReelle>[];
+const capturesReelles = <CaptureReelle>[
+  // Capturé le 19/07/2026 sur l'app LinkedIn officielle (Android 13), offre
+  // « Développeur Python H/F » chez NEXTON, extrait de la base de l'appareil.
+  // L'app ne partage QUE l'URL : aucun titre, aucune entreprise. Le parseur
+  // doit l'admettre (needsReview) et laisser l'utilisateur compléter ; aucune
+  // regex de titre ne sauvera ce cas.
+  CaptureReelle(
+    nom: 'LinkedIn, app officielle : URL seule',
+    brut: 'https://www.linkedin.com/jobs/view/4435206974/',
+    titre: null,
+    entreprise: null,
+    source: 'linkedin',
+  ),
+];
 
 void main() {
   group('captures réelles', () {

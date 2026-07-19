@@ -12,9 +12,10 @@ vient en dernier.
 > **État au 19/07/2026** : étapes 1 et 2 codées, 28 tests verts, analyse
 > propre, et **vérifiées sur appareil réel** (OnePlus CPH2195, Android 13) :
 > partage → écran de réception (titre, entreprise, URL, source extraits) →
-> enregistrement avec score → doublon refusé au repartage. Reste, pour clore
-> l'étape 2 : un partage depuis les vraies applications LinkedIn/Indeed/WTTJ
-> pour remplir `capturesReelles`. SDK Android installé (voir étape 0).
+> enregistrement avec score → doublon refusé au repartage. Partage réel
+> depuis l'app LinkedIn officielle validé et figé en fixture : elle ne
+> partage QUE l'URL (titre et entreprise saisis à la main). Restent Indeed,
+> WTTJ et HelloWork à capturer. SDK Android installé (voir étape 0).
 
 ## Étape 0 : prérequis (à faire par Benjamin)
 
@@ -62,10 +63,11 @@ assets se lisent.
 - [x] Reprendre les cas de test de `reference/offer-utils.test.mjs` en tests Dart
 - [x] Enregistrer l'offre en base, avec dédup par hash
 - [ ] Lors du test sur appareil : capturer les textes **réellement** partagés
-      par LinkedIn, Indeed, WTTJ et HelloWork, et les figer en fixtures dans
-      `test/shared_text_test.dart` (le harnais `capturesReelles` y est prêt).
-      Les regex actuelles sont des suppositions ; seules des captures réelles
-      permettent de les ajuster sans casser ce qui marche.
+      et les figer en fixtures dans `test/shared_text_test.dart` (harnais
+      `capturesReelles`). Fait : LinkedIn (19/07/2026, URL seule — aucune
+      regex de titre ne verra jamais un partage LinkedIn). Restent : Indeed,
+      WTTJ, HelloWork. Les regex actuelles restent des suppositions pour ces
+      sources-là ; ne pas les « améliorer » sans capture réelle.
 
 **Acceptation :** partager une offre depuis l'application LinkedIn officielle crée
 l'entrée en base, avec un titre et une entreprise corrects, et un score cohérent.
