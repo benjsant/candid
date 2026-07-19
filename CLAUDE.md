@@ -166,7 +166,11 @@ flutter run                                          # sur l'appareil branché (
 ```
 
 Le SDK Flutter est sur la machine (`~/distrobox/flutter_sdk/flutter/bin`). Le
-SDK **Android** est le prérequis des commandes sur appareil (voir TASKS étape 0).
+SDK **Android** est dans `~/Android/Sdk` et le JDK (Temurin 21) dans
+`~/Android/jdk`, tous deux déclarés à Flutter via `flutter config`
+(`--android-sdk`, `--jdk-dir`) : pas de variable d'environnement à poser.
+`compileSdk = 37` est figé dans `android/app/build.gradle.kts` (exigence de
+`receive_sharing_intent`), ne pas le redescendre à `flutter.compileSdkVersion`.
 
 ## Vérification sur appareil (avec Claude)
 

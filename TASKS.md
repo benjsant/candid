@@ -9,19 +9,24 @@ d'abord la chaîne « une offre en entrée, un dossier de candidature en sortie 
 qui est le cœur du produit. La collecte automatique, la partie la plus fragile,
 vient en dernier.
 
-> **État au 17/07/2026** : étapes 1 et 2 codées, 28 tests verts, analyse
-> propre. Optimisations structurelles appliquées : index SQLite (parité avec
-> le schéma Postgres), insertion `INSERT OR IGNORE` par hash (dédup sans
-> SELECT préalable), `IndexedStack` (les onglets gardent leur état). Critères
-> d'acceptation « sur appareil » en attente du SDK Android.
+> **État au 19/07/2026** : étapes 1 et 2 codées, 28 tests verts, analyse
+> propre, et **vérifiées sur appareil réel** (OnePlus CPH2195, Android 13) :
+> partage → écran de réception (titre, entreprise, URL, source extraits) →
+> enregistrement avec score → doublon refusé au repartage. Reste, pour clore
+> l'étape 2 : un partage depuis les vraies applications LinkedIn/Indeed/WTTJ
+> pour remplir `capturesReelles`. SDK Android installé (voir étape 0).
 
 ## Étape 0 : prérequis (à faire par Benjamin)
 
 - [x] SDK Flutter installé (3.44.6, le projet compile et les tests passent)
-- [ ] Installer le SDK **Android** (JDK + cmdline-tools) : c'est LE bloquant
-      actuel, sans lui pas d'APK ni de test sur appareil
-- [ ] Activer le mode développeur et le débogage USB sur le téléphone
-- [ ] Vérification visuelle avec Claude : scrcpy sert à l'humain (miroir de
+- [x] SDK **Android** installé le 19/07/2026, sans sudo ni Android Studio :
+      cmdline-tools + platform-tools + plateformes 36 et 37 + build-tools 36
+      dans `~/Android/Sdk`, JDK Temurin 21 dans `~/Android/jdk` (le système
+      n'a qu'un JRE). Déclarés à Flutter via `flutter config --android-sdk`
+      et `--jdk-dir` : `flutter doctor` est vert, VSCode voit l'appareil
+      (redémarrer l'éditeur après un changement de config)
+- [x] Mode développeur et débogage USB activés (adb et scrcpy installés)
+- [x] Vérification visuelle avec Claude : scrcpy sert à l'humain (miroir de
       l'écran) ; pour que Claude « voie » le téléphone, passer par
       `adb exec-out screencap -p > capture.png` (adb est fourni avec le SDK
       Android et embarqué dans scrcpy), puis lui faire lire le PNG

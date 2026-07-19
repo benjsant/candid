@@ -6,7 +6,10 @@ plugins {
 
 android {
     namespace = "com.benjsant.candid"
-    compileSdk = flutter.compileSdkVersion
+    // 37 et non flutter.compileSdkVersion (36) : receive_sharing_intent exige
+    // de compiler contre l'API 37. N'affecte que la compilation, pas le
+    // comportement à l'exécution (targetSdk reste celui de Flutter).
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
