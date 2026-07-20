@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../data/database.dart';
 import '../data/offers_repository.dart';
+import 'offer_detail_screen.dart';
 
 class OffersScreen extends StatelessWidget {
   const OffersScreen({super.key, required this.repository});
@@ -30,6 +31,9 @@ class OffersScreen extends StatelessWidget {
             offer: offers[i],
             onIgnore: () =>
                 repository.setStatus(offers[i].id, OfferStatus.ignored),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => OfferDetailScreen(offer: offers[i]),
+            )),
           ),
         );
       },
@@ -38,10 +42,15 @@ class OffersScreen extends StatelessWidget {
 }
 
 class _OfferTile extends StatelessWidget {
-  const _OfferTile({required this.offer, required this.onIgnore});
+  const _OfferTile({
+    required this.offer,
+    required this.onIgnore,
+    required this.onTap,
+  });
 
   final Offer offer;
   final VoidCallback onIgnore;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +66,7 @@ class _OfferTile extends StatelessWidget {
       ),
       onDismissed: (_) => onIgnore(),
       child: ListTile(
+        onTap: onTap,
         leading: CircleAvatar(
           backgroundColor: score >= 75
               ? Theme.of(context).colorScheme.primaryContainer

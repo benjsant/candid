@@ -78,13 +78,23 @@ Partager deux fois la même offre ne crée qu'une entrée.
 
 ## Étape 3 : rendu PDF
 
-- [ ] `lib/render/cv_document.dart` : le CV en widgets `pdf`, à partir des données
-      de `assets/cv/*.json` (s'inspirer de `reference/template-ats.astro`)
-- [ ] `lib/render/letter_document.dart` : la lettre (voir
-      `reference/letter-template.mjs`)
-- [ ] Aperçu à l'écran (`printing`) et partage du fichier PDF
+- [x] `lib/render/cv_document.dart` : le CV en widgets `pdf`, port du template
+      ATS (1 colonne, indigo sobre) depuis `assets/cv/*.json`
+- [x] `lib/render/letter_template.dart` : port pur de `letter-template.mjs`
+      (accroche + placeholders + objet + anti-dash), testé
+- [x] `lib/render/letter_document.dart` : mise en page de la lettre (expéditeur,
+      objet, corps figé, signature)
+- [x] `lib/render/pdf_theme.dart` : police embarquée Liberation Sans. La
+      Helvetica intégrée du paquet `pdf` affichait « • » et « œ » en tofu.
+- [x] Aperçu à l'écran (`printing`) et partage du fichier PDF, via
+      `document_preview_screen.dart` ; accès depuis `offer_detail_screen.dart`
+      (tap sur une offre)
 
 **Acceptation :** le PDF s'ouvre sur le téléphone et se partage par mail.
+✅ Vérifié sur appareil (Oppo, 20/07) : CV et lettre s'affichent (aperçu
+`printing`), les puces et « œuvre » sont correctes, et la feuille de partage
+propose Gmail. L'accroche de la lettre est un placeholder marqué « à générer »
+(l'agent la rédige à l'étape 4) : rien n'est inventé.
 
 > Ne pas chercher la parité au pixel près avec le PDF Astro. C'est un puits sans
 > fond, et personne ne le remarquera. Un template propre et lisible suffit.
