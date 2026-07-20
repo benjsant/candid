@@ -134,16 +134,26 @@ l'API INSEE a été confirmée en direct.
 
 ## Étape 5 : suivi
 
-- [ ] Écran de suivi : candidatures, statuts (draft, sent, interview, rejected,
-      accepted), dates
-- [ ] Marquer une candidature comme envoyée après l'avoir envoyée soi-même
-- [ ] Rappel de relance
-- [ ] Export de la base (partage du fichier SQLite ou d'un JSON) : contrairement
-      au Postgres du projet Docker, tout l'historique vit sur un téléphone qui
-      peut se perdre. Une heure de travail qui protège des mois de suivi.
+- [x] `lib/data/applications_repository.dart` : créer une candidature depuis une
+      offre (idempotent, sort l'offre de la boîte), suivre la liste, changer
+      statut/dates/notes. Testé (6 tests).
+- [x] `lib/ui/tracking_screen.dart` : onglet Suivi, une carte par candidature,
+      statut (draft, sent, interview, rejected, accepted) via liste déroulante,
+      dates, note et relance dans le menu ⋮.
+- [x] Marquer « Envoyée » date `appliedAt` ; une réponse date `responseAt`.
+      L'envoi reste manuel : dater n'envoie rien.
+- [x] Rappel de relance (sélecteur de date par candidature).
+- [x] Bouton « Suivre cette candidature » sur l'écran de détail de l'offre.
+- [x] Export JSON (offres + candidatures) partagé via `share_plus`
+      (`lib/data/export_service.dart`), action dans la barre de l'onglet Suivi.
+      Tout l'historique vit sur le téléphone : cet export le protège.
 
 **Acceptation :** le cycle complet, du partage de l'offre à « envoyée », tient
 sans quitter l'application.
+✅ Vérifié sur appareil (Oppo, 20/07) : partage → offre → « Suivre » → l'offre
+quitte la boîte et la candidature apparaît dans Suivi → passage à « Envoyée »
+daté automatiquement → export JSON valide (offres + candidatures) proposé au
+partage (Drive, Gmail, fichiers).
 
 ## Étape 6 : collecte automatique
 

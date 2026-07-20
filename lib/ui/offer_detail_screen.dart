@@ -16,6 +16,7 @@ import '../agent/graph.dart';
 import '../agent/models.dart';
 import '../core/assets.dart';
 import '../core/secrets.dart';
+import '../data/applications_repository.dart';
 import '../data/database.dart';
 import '../render/cv_document.dart';
 import '../render/letter_document.dart';
@@ -28,11 +29,13 @@ class OfferDetailScreen extends StatefulWidget {
     super.key,
     required this.offer,
     required this.secrets,
+    required this.applications,
     this.assets = const AppAssets(),
   });
 
   final Offer offer;
   final Secrets secrets;
+  final ApplicationsRepository applications;
   final AppAssets assets;
 
   @override
@@ -46,6 +49,7 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
   bool _busy = false;
   AgentRun? _run;
   int _usedToday = 0;
+  bool _tracked = false;
 
   @override
   void initState() {
@@ -53,6 +57,16 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
     _agent.usedToday().then((n) {
       if (mounted) setState(() => _usedToday = n);
     });
+    widget.applications.forOffer(widget.offer.id).then((a) {
+      if (mounted && a != null) setState(() => _tracked = true);
+    });
+  }
+
+  Future<void> _track() async {
+    await widget.applications.createFromOffer(widget.offer);
+    if (!mounted) return;
+    setState(() => _tracked = true);
+    _snack('Candidature ajoutée au suivi (onglet Suivi).');
   }
 
   Future<void> _generate() async {
@@ -221,6 +235,24 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
           ),
 
           const SizedBox(height: 20),
+          // Suivre la candidature : la fait passer dans l'onglet Suivi et sort
+          // l'offre de la boîte de réception.
+          if (_tracked)
+            Row(children: [
+              Icon(Icons.check_circle_outline,
+                  size: 18, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 8),
+              Text('Dans le suivi',
+                  style: Theme.of(context).textTheme.bodyMedium),
+            ])
+          else
+            FilledButton.tonalIcon(
+              onPressed: _busy ? null : _track,
+              icon: const Icon(Icons.bookmark_add_outlined),
+              label: const Text('Suivre cette candidature'),
+            ),
+
+          const SizedBox(height: 16),
           Text(
             'Rien n\'est envoyé : vous relisez le CV et la lettre, puis vous '
             'partagez le PDF vous-même, depuis votre messagerie.',

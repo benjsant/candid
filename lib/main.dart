@@ -15,12 +15,15 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import 'core/app_prefs.dart';
 import 'core/secrets.dart';
+import 'data/applications_repository.dart';
 import 'data/database.dart';
+import 'data/export_service.dart';
 import 'data/offers_repository.dart';
 import 'sources/shared_text.dart';
 import 'ui/offers_screen.dart';
 import 'ui/receive_share_screen.dart';
 import 'ui/settings_screen.dart';
+import 'ui/tracking_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +34,8 @@ Future<void> main() async {
   runApp(
     CandidApp(
       repository: OffersRepository(db),
+      applications: ApplicationsRepository(db),
+      export: ExportService(db),
       secrets: Secrets(),
       prefs: prefs,
       themeMode: themeMode,
@@ -42,12 +47,16 @@ class CandidApp extends StatelessWidget {
   const CandidApp({
     super.key,
     required this.repository,
+    required this.applications,
+    required this.export,
     required this.secrets,
     required this.prefs,
     required this.themeMode,
   });
 
   final OffersRepository repository;
+  final ApplicationsRepository applications;
+  final ExportService export;
   final Secrets secrets;
   final AppPrefs prefs;
   final ValueNotifier<ThemeMode> themeMode;
@@ -73,6 +82,8 @@ class CandidApp extends StatelessWidget {
         ),
         home: HomeScreen(
           repository: repository,
+          applications: applications,
+          export: export,
           secrets: secrets,
           prefs: prefs,
           themeMode: themeMode,
@@ -86,12 +97,16 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.repository,
+    required this.applications,
+    required this.export,
     required this.secrets,
     required this.prefs,
     required this.themeMode,
   });
 
   final OffersRepository repository;
+  final ApplicationsRepository applications;
+  final ExportService export;
   final Secrets secrets;
   final AppPrefs prefs;
   final ValueNotifier<ThemeMode> themeMode;
@@ -107,12 +122,12 @@ class _HomeScreenState extends State<HomeScreen> {
   // Construits UNE fois : avec un IndexedStack, chaque onglet garde son état
   // (l'écran Réglages ne relit pas le secure storage à chaque bascule).
   late final List<Widget> _pages = [
-    OffersScreen(repository: widget.repository, secrets: widget.secrets),
-    const _Placeholder(
-      icon: Icons.timeline_outlined,
-      title: 'Suivi',
-      detail: 'Vos candidatures et leurs réponses (étape 5).',
+    OffersScreen(
+      repository: widget.repository,
+      applications: widget.applications,
+      secrets: widget.secrets,
     ),
+    TrackingScreen(repository: widget.applications),
     SettingsScreen(
       secrets: widget.secrets,
       prefs: widget.prefs,
@@ -160,10 +175,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _export() async {
+    try {
+      await widget.export.shareExport();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Export impossible : $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(['Offres', 'Suivi', 'Réglages'][_tab])),
+      appBar: AppBar(
+        title: Text(['Offres', 'Suivi', 'Réglages'][_tab]),
+        actions: [
+          // Export sur l'onglet Suivi : sauvegarder offres + candidatures.
+          if (_tab == 1)
+            IconButton(
+              icon: const Icon(Icons.ios_share),
+              tooltip: 'Exporter mes données',
+              onPressed: _export,
+            ),
+        ],
+      ),
       body: IndexedStack(index: _tab, children: _pages),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
@@ -185,41 +222,6 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Réglages',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Placeholder extends StatelessWidget {
-  const _Placeholder({
-    required this.icon,
-    required this.title,
-    required this.detail,
-  });
-
-  final IconData icon;
-  final String title;
-  final String detail;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 48),
-            const SizedBox(height: 16),
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(
-              detail,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
       ),
     );
   }

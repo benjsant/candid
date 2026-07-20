@@ -16,9 +16,15 @@ parité). Contrat central : ne jamais broder, ne rien envoyer sans l'utilisateur
 
 ## État au 20/07/2026
 
-- **Étapes 1, 2, 3 faites et validées sur appareil ; étape 4 (l'agent) codée
+- **Étapes 1, 2, 3, 5 faites et validées sur appareil ; étape 4 (l'agent) codée
   et testée, bout-en-bout en attente d'une clé LLM.** Oppo CPH2195, Android 13.
-  78 tests verts, `flutter analyze` propre.
+  84 tests verts, `flutter analyze` propre.
+- **Étape 5 (suivi) close** : `ApplicationsRepository` (créer depuis une offre,
+  statut/dates/notes/relance), onglet Suivi (`tracking_screen.dart`), bouton
+  « Suivre » sur l'offre (l'offre quitte la boîte), export JSON via `share_plus`
+  (`export_service.dart`). Cycle offre → suivi → « Envoyée » daté → export
+  vérifié sur appareil. Mode clair/sombre manuel + sélecteurs en listes
+  déroulantes déjà en place. `pubspec.lock` versionné, `Annotated.hash` retiré.
 - **Étape 4 (l'agent) codée** : `lib/agent/` = models (port schema.py), guards
   (no_dash, check_accroche, sanitize — non négociables), llm (client
   multi-fournisseurs OpenAI-compatible, cache-friendly), research (grounding
@@ -102,7 +108,7 @@ un peu moins par appareil.
 ## Prochaines actions concrètes
 
 1. Bout-en-bout de l'agent avec une clé LLM (voir étape 0).
-2. Étape 5 (suivi) : statuts, relances, export de la base.
+2. Étape 6 (collecte automatique) : France Travail + LBA, workmanager.
 3. Compléter `capturesReelles` (Indeed via login, HelloWork) à l'occasion.
 
 ## Journal
