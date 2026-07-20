@@ -1,6 +1,6 @@
 Liberation Sans fonts embarquées pour le rendu PDF (CV et lettre).
 
-Police : Liberation Sans (Regular, Bold, Italic).
+Police : Liberation Sans (Regular, Bold).
 Licence : SIL Open Font License, Version 1.1.
 Auteur : Red Hat, Inc. ; contributions de Google.
 

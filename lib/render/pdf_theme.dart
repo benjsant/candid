@@ -15,11 +15,7 @@ Future<pw.ThemeData> loadPdfTheme() async {
       await rootBundle.load('assets/fonts/LiberationSans-Regular.ttf'));
   final bold =
       pw.Font.ttf(await rootBundle.load('assets/fonts/LiberationSans-Bold.ttf'));
-  final italic = pw.Font.ttf(
-      await rootBundle.load('assets/fonts/LiberationSans-Italic.ttf'));
-  return pw.ThemeData.withFont(
-    base: regular,
-    bold: bold,
-    italic: italic,
-  );
+  // Pas d'italique embarqué : ni le CV ni la lettre n'en utilisent. À rajouter
+  // (LiberationSans-Italic.ttf) le jour où un rendu en aura besoin.
+  return pw.ThemeData.withFont(base: regular, bold: bold);
 }

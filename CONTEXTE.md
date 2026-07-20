@@ -84,11 +84,26 @@ tourné). Protocole : **scrcpy pour l'humain** (miroir), **`adb exec-out
 screencap -p > capture.png` pour Claude** (lit le PNG et valide chaque écran).
 Téléphone en USB + débogage activé + mode « Transfert de fichiers » (pas MIDI).
 
+## Taille de l'app : debug ≠ release
+
+L'écran « Informations sur l'appli » affichait ~180 Mo : c'est l'artefact
+**debug** (kernel Dart JIT 88 Mo, 3 moteurs Flutter debug non-strippés, couche
+Vulkan). Ce n'est PAS un problème à corriger dans le code. Le livrable réel est
+un **build release découpé par architecture** :
+
+```bash
+flutter build apk --release --split-per-abi
+```
+
+→ ~22 Mo pour l'arm64 (le téléphone). Ne pas s'alarmer du chiffre du build
+debug. Pour le Play Store, un `.aab` (`flutter build appbundle`) livrerait encore
+un peu moins par appareil.
+
 ## Prochaines actions concrètes
 
-1. Attaquer l'étape 3 : rendu PDF en widgets Dart (`pdf`/`printing`), sans
-   viser la parité pixel avec l'Astro.
-2. Compléter `capturesReelles` (Indeed, WTTJ, HelloWork) à l'occasion.
+1. Bout-en-bout de l'agent avec une clé LLM (voir étape 0).
+2. Étape 5 (suivi) : statuts, relances, export de la base.
+3. Compléter `capturesReelles` (Indeed via login, HelloWork) à l'occasion.
 
 ## Journal
 
