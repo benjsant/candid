@@ -1,4 +1,4 @@
-# CONTEXTE.md — mémoire portable de Candid
+# CONTEXTE.md : mémoire portable de Candid
 
 Ce fichier est la **mémoire de session** : décisions prises, état réel,
 ce qui est en attente, journal daté. Il complète (ne remplace pas) :
