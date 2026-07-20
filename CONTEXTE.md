@@ -44,12 +44,12 @@ parité). Contrat central : ne jamais broder, ne rien envoyer sans l'utilisateur
 
 ## Bloquants et points ouverts
 
-- **La build sur le téléphone est en retard sur le dépôt.** L'Oppo tourne une
-  version antérieure aux index SQLite et à `dedupHash`. Réinstaller via
-  `flutter run` pour tester ces changements (données locales jetables).
-- **Test d'acceptation étape 2 à finir** sur appareil : remplir titre +
-  entreprise, enregistrer, vérifier l'affichage dans l'onglet Offres avec score,
-  puis re-partager pour la dédup.
+- **Étape 2 : critère d'acceptation validé sur appareil (20/07).** Build à jour
+  réinstallée sur l'Oppo, `dedupHash` vérifié en conditions réelles : deux
+  partages de la même URL France Travail avec des titres saisis différemment
+  (« Dev IA » puis « Developpeur IA H/F ») → une seule entrée, « Vous aviez
+  déjà cette offre ». Base tirée de l'appareil : hash = `sha256('url:'+canonUrl)`
+  confirmé, et les index `idx_offers_*` sont bien présents.
 - **`capturesReelles`** : LinkedIn et France Travail figés (URL seule). Manque
   Indeed, WTTJ, HelloWork, à capturer quand l'occasion se présente.
 - **`linux/`** : scaffolding desktop généré par Flutter, commité le 20/07.
@@ -65,13 +65,18 @@ Téléphone en USB + débogage activé + mode « Transfert de fichiers » (pas M
 
 ## Prochaines actions concrètes
 
-1. Réinstaller Candid sur l'Oppo (`flutter run`) pour aligner avec le dépôt.
-2. Finir le critère d'acceptation de l'étape 2 (save + affichage + dédup).
-3. Attaquer l'étape 3 : rendu PDF en widgets Dart (`pdf`/`printing`), sans
+1. Attaquer l'étape 3 : rendu PDF en widgets Dart (`pdf`/`printing`), sans
    viser la parité pixel avec l'Astro.
+2. Compléter `capturesReelles` (Indeed, WTTJ, HelloWork) à l'occasion.
 
 ## Journal
 
+- **20/07/2026 (soir)** : build à jour réinstallée sur l'Oppo, `dedupHash`
+  vérifié en vrai (repartage même URL FT, titre retapé → doublon refusé), hash
+  et index `idx_offers_*` confirmés depuis la base de l'appareil. Bloquant
+  « build en retard » levé. Étape 2 close. Petite scorie notée : `Annotated.hash`
+  n'est plus lu par le repository depuis `dedupHash` (calcul SHA256 inutile à
+  chaque save) — à nettoyer un jour, sans urgence.
 - **20/07/2026** : test de bout en bout de l'étape 2 sur l'Oppo (LinkedIn +
   France Travail). Constat URL-seule confirmé. `dedupHash` ajouté (dédup sur
   l'URL, repli titre+entreprise), fixtures réelles figées, PLAN/TASKS mis à
