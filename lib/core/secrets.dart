@@ -14,6 +14,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 enum SecretKey {
   deepseekApiKey('deepseek_api_key', 'Clé DeepSeek',
       'Sans elle, pas de scoring fin, pas de lettre, pas de CV personnalisé.'),
+  openrouterApiKey('openrouter_api_key', 'Clé OpenRouter',
+      'Fournisseur alternatif (mode gratuit, données non entraînées).'),
+  geminiApiKey('gemini_api_key', 'Clé Gemini',
+      'Fournisseur optionnel, à réserver aux usages non sensibles.'),
   franceTravailClientId('ft_client_id', 'France Travail : client id',
       'Sans elle, la collecte automatique France Travail est désactivée.'),
   franceTravailClientSecret('ft_client_secret', 'France Travail : client secret',
@@ -55,9 +59,12 @@ class Secrets {
 
   Future<bool> has(SecretKey key) async => (await read(key)) != null;
 
-  /// L'agent DeepSeek est le cœur du produit : sans sa clé, l'application se
-  /// réduit à une liste d'offres.
-  Future<bool> get canRunAgent => has(SecretKey.deepseekApiKey);
+  /// L'agent est le cœur du produit : sans au moins une clé de fournisseur LLM,
+  /// l'application se réduit à une liste d'offres.
+  Future<bool> get canRunAgent async =>
+      await has(SecretKey.deepseekApiKey) ||
+      await has(SecretKey.openrouterApiKey) ||
+      await has(SecretKey.geminiApiKey);
 
   /// La collecte France Travail exige les deux moitiés de l'identifiant OAuth.
   Future<bool> get canCollectFranceTravail async =>
