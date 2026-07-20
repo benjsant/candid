@@ -58,6 +58,19 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   drift_dev: ^2.34.4
   build_runner: ^2.15.1
+  flutter_launcher_icons: ^0.14.4
+
+# Génération de l'icône du lanceur (dart run flutter_launcher_icons). Le fond
+# vert de la marque + le monogramme « C ». Icône adaptative Android : le C sur
+# fond vert plein, centré dans la zone sûre. Les sources (assets/icon/) ne sont
+# PAS embarquées à l'exécution, elles ne servent qu'à la génération.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/candid_icon.png"
+  adaptive_icon_background: "#2F6F4E"
+  adaptive_icon_foreground: "assets/icon/candid_icon_fg.png"
+  min_sdk_android: 21
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
