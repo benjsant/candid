@@ -16,18 +16,28 @@ parité). Contrat central : ne jamais broder, ne rien envoyer sans l'utilisateur
 
 ## État au 20/07/2026
 
-- **Étapes 1, 2 et 3 faites et validées sur appareil réel** (Oppo CPH2195,
-  Android 13). 45 tests verts, `flutter analyze` propre.
+- **Étapes 1, 2, 3 faites et validées sur appareil ; étape 4 (l'agent) codée
+  et testée, bout-en-bout en attente d'une clé LLM.** Oppo CPH2195, Android 13.
+  78 tests verts, `flutter analyze` propre.
+- **Étape 4 (l'agent) codée** : `lib/agent/` = models (port schema.py), guards
+  (no_dash, check_accroche, sanitize — non négociables), llm (client
+  multi-fournisseurs OpenAI-compatible, cache-friendly), research (grounding
+  INSEE sans clé), graph (analyze→research→accroche→judge→validate + boucle
+  d'auto-correction), agent_config (fournisseur, modèle, plafond 5/jour),
+  agent_service. UI : bouton « Générer la candidature » → CV ciblé + lettre à
+  accroche réelle ; réglages avec sélecteur de fournisseur. Vérifié appareil :
+  plafond « 0/5 » affiché, dégradation propre sans clé, sélecteur OK.
+  **Reste : un vrai appel LLM (clé requise, étape 0).**
 - **Étape 3 (rendu PDF) close** : CV (port du template ATS) et lettre (corps
-  figé, accroche placeholder en attendant l'agent) rendus en widgets `pdf`,
-  aperçu + partage via `printing`. Police Liberation Sans embarquée (la
-  Helvetica intégrée affichait « • » et « œ » en tofu). Accès par tap sur une
-  offre → écran de détail → boutons Aperçu CV / Aperçu lettre.
+  figé) rendus en widgets `pdf`, aperçu + partage via `printing`. Police
+  Liberation Sans embarquée (la Helvetica intégrée affichait « • » et « œ » en
+  tofu). Accès par tap sur une offre → écran de détail.
 - **Testé pour de vrai** : partager une offre depuis l'app LinkedIn ET depuis
   France Travail (Parcours Emploi) ouvre bien Candid sur l'écran de réception,
   la source est détectée, et le garde-fou anti-invention fonctionne (« je n'ai
   pas tout reconnu » quand l'app ne partage qu'une URL).
-- **Prochaine étape : 4 (l'agent)**. Puis 5 (suivi), 6 (collecte).
+- **Prochaine étape : bout-en-bout de l'agent avec une clé LLM**, puis 5
+  (suivi), 6 (collecte).
 
 ## Décisions structurantes (avec le pourquoi)
 

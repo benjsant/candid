@@ -101,35 +101,36 @@ propose Gmail. L'accroche de la lettre est un placeholder marqué « à génére
 
 ## Étape 4 : l'agent
 
-- [ ] `lib/agent/llm.dart` : interface `LlmClient` (multi-fournisseurs, voir
-      PLAN.md « Le LLM »). Une méthode : prompt système + message → texte/JSON.
-      **Concevoir pour le cache dès le départ** : le préfixe constant (prompt
-      système + cv-index) toujours en tête des messages, dans le même ordre, et
-      tout ce qui varie (l'offre) à la fin. Les tokens en cache coûtent une
-      fraction du prix et répondent plus vite ; dur à retrofitter ensuite.
-- [ ] `lib/agent/providers/` : trois implémentations HTTP compatibles OpenAI :
-      `deepseek.dart` (défaut), `openrouter.dart` (mode gratuit/privé, option
-      d'entraînement désactivée), `gemini.dart` (option, données non sensibles).
-      Modèle configurable dans les réglages, jamais codé en dur.
-- [ ] Réglages : choix du fournisseur actif + du modèle ; clé par fournisseur
-      dans le secure storage. Une clé absente désactive proprement le fournisseur.
-- [ ] `lib/agent/graph.dart` : porter les 5 nœuds de `reference/graph.py`
-      (analyze, research, accroche, judge, validate) en fonctions `async`.
-      Le grounding de `research` (`recherche-entreprises.api.gouv.fr`) est sans
-      clé et sans OAuth : il se porte tel quel en un appel dio. Ne pas le
-      remplacer par « demander au LLM ce qu'il sait de l'entreprise » : c'est
-      lui qui ancre l'accroche dans des faits vérifiables.
-- [ ] `lib/agent/guards.dart` : porter `no_dash`, `check_accroche`,
-      `sanitize_personalisation` (garde-fous **non négociables**)
-- [ ] Tests des garde-fous : une personnalisation qui invente une compétence
-      absente du CV doit être rejetée
-- [ ] Plafond d'appels quotidiens à l'agent (garde-fou de coût), **visible dans
-      l'interface** (« 3/5 aujourd'hui ») plutôt qu'un refus silencieux
-- [ ] Brancher : une offre partagée produit un CV et une lettre personnalisés
+- [x] `lib/agent/llm.dart` : interface `LlmClient` (+ `LlmGateway` abstrait),
+      cache-friendly (prompt système stable en 1er message, offre variable
+      ensuite). Un appel JSON, tolérant aux clôtures markdown.
+- [x] Trois fournisseurs OpenAI-compatibles derrière l'enum `LlmProvider` :
+      DeepSeek (défaut), OpenRouter, Gemini. Modèle configurable, jamais en dur.
+      (Un seul client paramétré plutôt que trois fichiers : même API.)
+- [x] Réglages : sélecteur de fournisseur + modèle (`AgentConfig`) ; clé par
+      fournisseur dans le secure storage. Clé absente = désactivation propre.
+- [x] `lib/agent/graph.dart` : 5 nœuds de `reference/graph.py` en async
+      (analyze, research, accroche, judge, validate) + boucle d'auto-correction.
+      `research` = grounding INSEE réel (`recherche-entreprises.api.gouv.fr`,
+      sans clé), `lib/agent/research.dart`.
+- [x] `lib/agent/guards.dart` : `no_dash`, `check_accroche`,
+      `sanitize_personnalisation` (garde-fous **non négociables**)
+- [x] Tests des garde-fous + du graphe + du client + du grounding (33 tests
+      d'agent) : cliché rejeté et régénéré, masquage borné, tiret cadratin retiré.
+- [x] Plafond d'appels quotidien (`AgentConfig`, défaut 5/jour), **visible**
+      dans l'écran de détail (« x/5 appels aujourd'hui »).
+- [x] Brancher : bouton « Générer la candidature » sur l'offre → CV ciblé
+      (personnalisation appliquée au rendu) + lettre à accroche réelle.
 
 **Acceptation :** sur une offre réelle, la lettre passe les garde-fous (rien
 d'inventé, aucun tiret cadratin) et l'accroche cite un fait vérifiable sur
 l'entreprise.
+⏳ Partiellement vérifié sur appareil (Oppo, 20/07) : UI branchée, plafond
+affiché (« 0/5 »), dégradation propre sans clé (« Aucune clé pour DeepSeek »),
+sélecteur de fournisseur fonctionnel. **Le bout-en-bout avec un vrai appel LLM
+reste à faire** : il exige une clé DeepSeek/OpenRouter/Gemini (étape 0). Les
+garde-fous, le graphe, le grounding et le client sont couverts par 33 tests, et
+l'API INSEE a été confirmée en direct.
 
 ## Étape 5 : suivi
 
