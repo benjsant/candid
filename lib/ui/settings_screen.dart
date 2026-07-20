@@ -6,26 +6,33 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../agent/agent_config.dart';
+import '../agent/llm.dart';
 import '../core/secrets.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key, required this.secrets});
+  const SettingsScreen({super.key, required this.secrets, this.agentConfig});
 
   final Secrets secrets;
+  final AgentConfig? agentConfig;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  late final AgentConfig _agentConfig = widget.agentConfig ?? AgentConfig();
+
   final Map<SecretKey, TextEditingController> _controllers = {
     for (final key in SecretKey.values) key: TextEditingController(),
   };
+  final _modelController = TextEditingController();
 
   /// On ne réaffiche jamais une clé enregistrée en clair : on indique seulement
   /// qu'elle est là. Le champ reste vide, et le rester ne l'efface pas.
   final Set<SecretKey> _stored = {};
 
+  LlmProvider _provider = LlmProvider.deepseek;
   bool _loading = true;
 
   @override
@@ -38,6 +45,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     for (final key in SecretKey.values) {
       if (await widget.secrets.has(key)) _stored.add(key);
     }
+    _provider = await _agentConfig.provider();
+    _modelController.text = await _agentConfig.model();
     if (mounted) setState(() => _loading = false);
   }
 
@@ -51,12 +60,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       entry.value.clear();
       changed++;
     }
+    await _agentConfig.setProvider(_provider);
+    await _agentConfig.setModel(_modelController.text);
     if (!mounted) return;
     setState(() {});
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          changed == 0 ? 'Rien à enregistrer.' : '$changed clé(s) enregistrée(s).',
+          changed == 0 ? 'Réglages enregistrés.' : '$changed clé(s) enregistrée(s).',
         ),
       ),
     );
@@ -73,6 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     for (final c in _controllers.values) {
       c.dispose();
     }
+    _modelController.dispose();
     super.dispose();
   }
 
@@ -94,6 +106,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
+        const SizedBox(height: 16),
+
+        // Fournisseur IA actif.
+        Text('Fournisseur de l\'agent',
+            style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 4),
+        Text(
+          'DeepSeek par défaut. OpenRouter propose un mode gratuit et '
+          'respectueux des données. Gemini est à réserver au non-sensible.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        SegmentedButton<LlmProvider>(
+          segments: [
+            for (final p in LlmProvider.values)
+              ButtonSegment(value: p, label: Text(p.label)),
+          ],
+          selected: {_provider},
+          onSelectionChanged: (s) => setState(() => _provider = s.first),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _modelController,
+          autocorrect: false,
+          enableSuggestions: false,
+          decoration: InputDecoration(
+            labelText: 'Modèle (facultatif)',
+            border: const OutlineInputBorder(),
+            hintText: 'Défaut : ${_provider.defaultModel}',
+            helperText: 'Laisser vide pour le modèle par défaut du fournisseur.',
+          ),
+        ),
+
+        const Divider(height: 32),
+
+        // Clés API.
+        Text('Clés API', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         for (final key in SecretKey.values) _field(key),
         const SizedBox(height: 16),

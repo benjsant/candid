@@ -12,6 +12,7 @@ library;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../agent/models.dart';
 import '../core/assets.dart';
 
 /// Charge toutes les données du CV depuis `assets/cv/*.json`.
@@ -92,13 +93,23 @@ List<Map<String, dynamic>> _list(Map<String, dynamic> m, String key) =>
 /// [theme] porte la police embarquée (voir `pdf_theme.dart`) ; sans lui, les
 /// glyphes « • » et « œ » s'affichent en tofu. Optionnel pour les tests de
 /// fumée, toujours fourni par l'application.
-pw.Document buildCvDocument(CvData data, {pw.ThemeData? theme}) {
+///
+/// [perso] est la personnalisation de l'agent (étape 4) : titre/résumé sur
+/// mesure, mise en avant et masquage. Elle ne fait QUE réordonner, masquer et
+/// reformuler à partir des données réelles — jamais inventer (les garde-fous de
+/// `sanitizePersonnalisation` bornent déjà le masquage). Sans elle, on rend le
+/// CV maître tel quel.
+pw.Document buildCvDocument(CvData data,
+    {pw.ThemeData? theme, PersonnalisationCv? perso}) {
   final doc = pw.Document(theme: theme);
   final p = data.profile;
+  bool hidden(String section) => perso?.hiddenSections.contains(section) ?? false;
 
   final name = _clean(p['name']).isEmpty ? '[Nom]' : _clean(p['name']);
-  final title = _clean(p['title']);
-  final summary = _clean(p['summary']);
+  final title = _clean(
+      (perso?.cvTitle.isNotEmpty ?? false) ? perso!.cvTitle : p['title']);
+  final summary = _clean(
+      (perso?.summary.isNotEmpty ?? false) ? perso!.summary : p['summary']);
   final links = (p['links'] as Map?)?.cast<String, dynamic>() ?? const {};
 
   final contacts = <List<String>>[
@@ -120,22 +131,40 @@ pw.Document buildCvDocument(CvData data, {pw.ThemeData? theme}) {
       ],
   ];
 
-  final skillRows = _buildSkillRows(data);
-  final projects = _list(data.projects, 'projects')
-      .where((e) => _clean(e['name']).isNotEmpty)
-      .toList();
-  final experiences = _list(data.experiences, 'experiences')
-      .where((e) => _clean(e['role']).isNotEmpty || _clean(e['company']).isNotEmpty)
-      .toList();
-  final education = _list(data.education, 'education')
-      .where((e) => _clean(e['degree']).isNotEmpty || _clean(e['school']).isNotEmpty)
-      .toList();
-  final certifications = _list(data.certifications, 'certifications')
-      .where((e) => _clean(e['name']).isNotEmpty)
-      .toList();
-  final interests = _list(data.interests, 'interests')
-      .where((e) => _clean(e['title']).isNotEmpty)
-      .toList();
+  final skillRows = hidden('skills') ? <_SkillRow>[] : _buildSkillRows(data, perso);
+  final projects = hidden('projects')
+      ? <Map<String, dynamic>>[]
+      : _reorder(
+          _list(data.projects, 'projects').where((e) =>
+              _clean(e['name']).isNotEmpty &&
+              !(perso?.hiddenProjects.contains(e['id']) ?? false)),
+          perso?.highlightProjects ?? const [],
+          (e) => e['id']?.toString() ?? '',
+        );
+  final experiences = hidden('experiences')
+      ? <Map<String, dynamic>>[]
+      : _reorder(
+          _list(data.experiences, 'experiences').where((e) =>
+              _clean(e['role']).isNotEmpty || _clean(e['company']).isNotEmpty),
+          perso?.highlightExperiences ?? const [],
+          (e) => e['id']?.toString() ?? '',
+        );
+  final education = hidden('education')
+      ? <Map<String, dynamic>>[]
+      : _list(data.education, 'education')
+          .where((e) =>
+              _clean(e['degree']).isNotEmpty || _clean(e['school']).isNotEmpty)
+          .toList();
+  final certifications = hidden('certifications')
+      ? <Map<String, dynamic>>[]
+      : _list(data.certifications, 'certifications')
+          .where((e) => _clean(e['name']).isNotEmpty)
+          .toList();
+  final interests = hidden('interests')
+      ? <Map<String, dynamic>>[]
+      : _list(data.interests, 'interests')
+          .where((e) => _clean(e['title']).isNotEmpty)
+          .toList();
 
   doc.addPage(
     pw.MultiPage(
@@ -206,19 +235,44 @@ pw.Document buildCvDocument(CvData data, {pw.ThemeData? theme}) {
   return doc;
 }
 
+/// Réordonne une liste : les éléments mis en avant d'abord, dans leur ordre
+/// d'origine, le reste ensuite. Port de `reorder` du template ATS.
+List<Map<String, dynamic>> _reorder(
+  Iterable<Map<String, dynamic>> items,
+  List<String> highlights,
+  String Function(Map<String, dynamic>) keyOf,
+) {
+  final list = items.toList();
+  final hi = list.where((e) => highlights.contains(keyOf(e)));
+  final rest = list.where((e) => !highlights.contains(keyOf(e)));
+  return [...hi, ...rest];
+}
+
 /// Lignes de compétences par catégorie, plus la ligne « Langues ».
-List<_SkillRow> _buildSkillRows(CvData data) {
+///
+/// [perso] masque les compétences hors sujet (`hidden_skills`) et remonte celles
+/// mises en avant (`highlight_skills`) ; une catégorie vidée disparaît.
+List<_SkillRow> _buildSkillRows(CvData data, [PersonnalisationCv? perso]) {
   final rows = <_SkillRow>[];
+  final hiddenSkills = perso?.hiddenSkills.toSet() ?? const <String>{};
+  final highlightSkills = perso?.highlightSkills ?? const <String>[];
   for (final cat in _list(data.skills, 'categories')) {
-    final items = ((cat['items'] as List?) ?? const [])
+    final kept = ((cat['items'] as List?) ?? const [])
         .whereType<Map>()
-        .where((s) => _clean(s['name']).isNotEmpty)
-        .map((s) {
-          final level = _clean(s['level']);
-          final name = _clean(s['name']);
-          return level.isNotEmpty ? '$name ($level)' : name;
-        })
+        .map((s) => s.cast<String, dynamic>())
+        .where((s) =>
+            _clean(s['name']).isNotEmpty && !hiddenSkills.contains(s['name']))
         .toList();
+    // Mises en avant d'abord.
+    final ordered = [
+      ...kept.where((s) => highlightSkills.contains(s['name'])),
+      ...kept.where((s) => !highlightSkills.contains(s['name'])),
+    ];
+    final items = ordered.map((s) {
+      final level = _clean(s['level']);
+      final name = _clean(s['name']);
+      return level.isNotEmpty ? '$name ($level)' : name;
+    }).toList();
     if (items.isNotEmpty) {
       rows.add(_SkillRow(_clean(cat['name']), items));
     }

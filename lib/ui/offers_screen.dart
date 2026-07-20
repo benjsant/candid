@@ -3,14 +3,16 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../core/secrets.dart';
 import '../data/database.dart';
 import '../data/offers_repository.dart';
 import 'offer_detail_screen.dart';
 
 class OffersScreen extends StatelessWidget {
-  const OffersScreen({super.key, required this.repository});
+  const OffersScreen({super.key, required this.repository, required this.secrets});
 
   final OffersRepository repository;
+  final Secrets secrets;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class OffersScreen extends StatelessWidget {
             onIgnore: () =>
                 repository.setStatus(offers[i].id, OfferStatus.ignored),
             onTap: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => OfferDetailScreen(offer: offers[i]),
+              builder: (_) => OfferDetailScreen(offer: offers[i], secrets: secrets),
             )),
           ),
         );

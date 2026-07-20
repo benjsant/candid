@@ -2,8 +2,10 @@
 ///
 /// Étapes couvertes (voir TASKS.md) :
 ///  - 1 : base locale, coffre-fort des clés, réglages ;
-///  - 2 : cible de partage, normalisation, hash, scoring local.
-/// L'agent (4) et le rendu PDF (3) viennent ensuite.
+///  - 2 : cible de partage, normalisation, hash, scoring local ;
+///  - 3 : rendu PDF du CV et de la lettre (aperçu, partage) ;
+///  - 4 : l'agent (jugement, grounding INSEE, accroche, personnalisation CV).
+/// Le suivi (5) et la collecte automatique (6) viennent ensuite.
 library;
 
 import 'dart:async';
@@ -79,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Construits UNE fois : avec un IndexedStack, chaque onglet garde son état
   // (l'écran Réglages ne relit pas le secure storage à chaque bascule).
   late final List<Widget> _pages = [
-    OffersScreen(repository: widget.repository),
+    OffersScreen(repository: widget.repository, secrets: widget.secrets),
     const _Placeholder(
       icon: Icons.timeline_outlined,
       title: 'Suivi',
