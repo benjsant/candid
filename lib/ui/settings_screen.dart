@@ -8,12 +8,21 @@ import 'package:flutter/material.dart';
 
 import '../agent/agent_config.dart';
 import '../agent/llm.dart';
+import '../core/app_prefs.dart';
 import '../core/secrets.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key, required this.secrets, this.agentConfig});
+  const SettingsScreen({
+    super.key,
+    required this.secrets,
+    required this.prefs,
+    required this.themeMode,
+    this.agentConfig,
+  });
 
   final Secrets secrets;
+  final AppPrefs prefs;
+  final ValueNotifier<ThemeMode> themeMode;
   final AgentConfig? agentConfig;
 
   @override
@@ -49,6 +58,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _modelController.text = await _agentConfig.model();
     if (mounted) setState(() => _loading = false);
   }
+
+  /// Change le thème tout de suite (aperçu immédiat) et le persiste.
+  Future<void> _setThemeMode(ThemeMode mode) async {
+    widget.themeMode.value = mode;
+    await widget.prefs.setThemeMode(mode);
+    if (mounted) setState(() {});
+  }
+
+  static const _themeLabels = {
+    ThemeMode.system: 'Système',
+    ThemeMode.light: 'Clair',
+    ThemeMode.dark: 'Sombre',
+  };
 
   Future<void> _save() async {
     var changed = 0;
@@ -108,6 +130,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         const SizedBox(height: 16),
 
+        // Apparence.
+        Text('Apparence', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<ThemeMode>(
+          initialValue: widget.themeMode.value,
+          decoration: const InputDecoration(
+            labelText: 'Thème',
+            border: OutlineInputBorder(),
+          ),
+          items: [
+            for (final e in _themeLabels.entries)
+              DropdownMenuItem(value: e.key, child: Text(e.value)),
+          ],
+          onChanged: (m) {
+            if (m != null) _setThemeMode(m);
+          },
+        ),
+
+        const Divider(height: 32),
+
         // Fournisseur IA actif.
         Text('Fournisseur de l\'agent',
             style: Theme.of(context).textTheme.titleSmall),
@@ -118,13 +160,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
-        SegmentedButton<LlmProvider>(
-          segments: [
+        DropdownButtonFormField<LlmProvider>(
+          initialValue: _provider,
+          decoration: const InputDecoration(
+            labelText: 'Fournisseur',
+            border: OutlineInputBorder(),
+          ),
+          items: [
             for (final p in LlmProvider.values)
-              ButtonSegment(value: p, label: Text(p.label)),
+              DropdownMenuItem(value: p, child: Text(p.label)),
           ],
-          selected: {_provider},
-          onSelectionChanged: (s) => setState(() => _provider = s.first),
+          onChanged: (p) {
+            if (p != null) setState(() => _provider = p);
+          },
         ),
         const SizedBox(height: 12),
         TextField(

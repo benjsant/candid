@@ -13,6 +13,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
+import 'core/app_prefs.dart';
 import 'core/secrets.dart';
 import 'data/database.dart';
 import 'data/offers_repository.dart';
@@ -21,13 +22,18 @@ import 'ui/offers_screen.dart';
 import 'ui/receive_share_screen.dart';
 import 'ui/settings_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final db = AppDatabase();
+  final prefs = AppPrefs();
+  // Charge le thème choisi avant le premier rendu, pour éviter un flash.
+  final themeMode = ValueNotifier<ThemeMode>(await prefs.themeMode());
   runApp(
     CandidApp(
       repository: OffersRepository(db),
       secrets: Secrets(),
+      prefs: prefs,
+      themeMode: themeMode,
     ),
   );
 }
@@ -37,25 +43,41 @@ class CandidApp extends StatelessWidget {
     super.key,
     required this.repository,
     required this.secrets,
+    required this.prefs,
+    required this.themeMode,
   });
 
   final OffersRepository repository;
   final Secrets secrets;
+  final AppPrefs prefs;
+  final ValueNotifier<ThemeMode> themeMode;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF2F6F4E));
-    return MaterialApp(
-      title: 'Candid',
-      theme: ThemeData(colorScheme: scheme, useMaterial3: true),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2F6F4E),
-          brightness: Brightness.dark,
+    const seed = Color(0xFF2F6F4E);
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeMode,
+      builder: (context, mode, _) => MaterialApp(
+        title: 'Candid',
+        themeMode: mode,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: seed),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: seed,
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
+        home: HomeScreen(
+          repository: repository,
+          secrets: secrets,
+          prefs: prefs,
+          themeMode: themeMode,
+        ),
       ),
-      home: HomeScreen(repository: repository, secrets: secrets),
     );
   }
 }
@@ -65,10 +87,14 @@ class HomeScreen extends StatefulWidget {
     super.key,
     required this.repository,
     required this.secrets,
+    required this.prefs,
+    required this.themeMode,
   });
 
   final OffersRepository repository;
   final Secrets secrets;
+  final AppPrefs prefs;
+  final ValueNotifier<ThemeMode> themeMode;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -87,7 +113,11 @@ class _HomeScreenState extends State<HomeScreen> {
       title: 'Suivi',
       detail: 'Vos candidatures et leurs réponses (étape 5).',
     ),
-    SettingsScreen(secrets: widget.secrets),
+    SettingsScreen(
+      secrets: widget.secrets,
+      prefs: widget.prefs,
+      themeMode: widget.themeMode,
+    ),
   ];
 
   @override
