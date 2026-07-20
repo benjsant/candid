@@ -45,6 +45,17 @@ const capturesReelles = <CaptureReelle>[
     entreprise: null,
     source: 'linkedin',
   ),
+  // Capturé le 20/07/2026 sur l'app Parcours Emploi (France Travail), offre
+  // Lille Métropole Habitat, partagée vers Candid sur l'Oppo (Android 13).
+  // Confirme sur appareil : l'app officielle ne partage QUE l'URL, exactement
+  // comme LinkedIn. Le parseur détecte bien la source et admet l'inconnue.
+  CaptureReelle(
+    nom: 'France Travail, app Parcours Emploi : URL seule',
+    brut: 'https://candidat.francetravail.fr/offres/recherche/detail/211FDFG',
+    titre: null,
+    entreprise: null,
+    source: 'france_travail',
+  ),
 ];
 
 void main() {

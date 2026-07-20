@@ -38,6 +38,34 @@ void main() {
     });
   });
 
+  group('dedupHash', () {
+    test('même URL à un slash/fragment près : même clé', () {
+      final a = dedupHash(url: 'https://candidat.francetravail.fr/offres/detail/211FDFG');
+      final b = dedupHash(url: 'https://candidat.francetravail.fr/offres/detail/211FDFG/');
+      final c = dedupHash(url: 'https://candidat.francetravail.fr/offres/detail/211FDFG#top');
+      expect(a, b);
+      expect(a, c);
+    });
+
+    test('URLs différentes : clés différentes, même titre saisi', () {
+      final a = dedupHash(url: 'https://ft.fr/1', title: 'Dev IA', company: 'X');
+      final b = dedupHash(url: 'https://ft.fr/2', title: 'Dev IA', company: 'X');
+      expect(a, isNot(b));
+    });
+
+    test('URL présente : le titre tapé n\'influence plus la clé', () {
+      final a = dedupHash(url: 'https://ft.fr/1', title: 'Dev IA');
+      final b = dedupHash(url: 'https://ft.fr/1', title: 'Développeur IA (H/F)');
+      expect(a, b);
+    });
+
+    test('sans URL : retombe sur le hash titre+entreprise+lieu', () {
+      final viaDedns = dedupHash(title: 'Dev', company: 'ACME', location: 'Lille');
+      final direct = computeHash(title: 'Dev', company: 'ACME', location: 'Lille');
+      expect(viaDedns, direct);
+    });
+  });
+
   group('scoring', () {
     test('une offre alignée sur le profil score haut', () {
       final offer = ScorableOffer(

@@ -55,13 +55,29 @@ void main() {
     expect(await db.select(db.offers).get(), hasLength(1));
   });
 
-  test('la même offre vue sur deux sites reste un doublon : le hash ignore la '
-      'source et la mise en forme', () async {
-    await share('Développeur IA Junior (H/F) chez ACME SAS\nhttps://linkedin.com/1');
-    final second = await share(
-      'Developpeur IA Junior F/H chez Acme\nhttps://fr.indeed.com/2',
-    );
+  test('même URL repartagée avec un titre retapé différemment : reste un '
+      'doublon (dédup sur l\'URL, robuste à la saisie manuelle)', () async {
+    // Le cas réel : les apps officielles ne partagent qu'une URL, l'utilisateur
+    // tape le titre à la main et pas forcément à l'identique la 2e fois.
+    const url = 'https://candidat.francetravail.fr/offres/recherche/detail/211FDFG';
+    final first = await repo.save(source: 'france_travail', title: 'Dev IA', url: url);
+    final second = await repo.save(
+        source: 'france_travail', title: 'Développeur IA (H/F)', company: 'LMH', url: url);
 
+    expect(first.outcome, SaveOutcome.saved);
+    expect(second.outcome, SaveOutcome.duplicate);
+    expect(await db.select(db.offers).get(), hasLength(1));
+  });
+
+  test('sans URL : dédup de repli sur titre+entreprise canonicalisés', () async {
+    // Offre sans lien (saisie libre / collecte future) : on retombe sur le
+    // hash titre+entreprise, insensible à la casse, aux accents et au (H/F).
+    final first = await repo.save(
+        source: 'shared', title: 'Développeur IA Junior (H/F)', company: 'ACME SAS');
+    final second = await repo.save(
+        source: 'shared', title: 'Developpeur IA Junior F/H', company: 'Acme');
+
+    expect(first.outcome, SaveOutcome.saved);
     expect(second.outcome, SaveOutcome.duplicate);
     expect(await db.select(db.offers).get(), hasLength(1));
   });

@@ -61,6 +61,15 @@ class OffersRepository {
       return const SaveResult(SaveOutcome.excluded);
     }
 
+    // Dédup sur l'URL quand elle existe (identité stable des partages), sinon
+    // sur le hash titre+entreprise+lieu. Voir dedupHash() pour le pourquoi.
+    final hash = dedupHash(
+      url: url,
+      title: title,
+      company: company,
+      location: location,
+    );
+
     // Un seul INSERT OR IGNORE : la contrainte UNIQUE sur le hash fait la
     // dédup, sans SELECT préalable ni fenêtre de course. Renvoie null si la
     // ligne existait déjà ; on ne paie le SELECT que dans ce cas-là.
@@ -68,7 +77,7 @@ class OffersRepository {
           OffersCompanion.insert(
             source: source,
             sourceId: Value(sourceId),
-            hash: annotated.hash,
+            hash: hash,
             title: title,
             company: Value(company),
             companyCanon: Value(canonCompany(company)),
@@ -84,7 +93,7 @@ class OffersRepository {
 
     if (row == null) {
       final existing = await (_db.select(_db.offers)
-            ..where((o) => o.hash.equals(annotated.hash)))
+            ..where((o) => o.hash.equals(hash)))
           .getSingle();
       return SaveResult(
         SaveOutcome.duplicate,

@@ -169,6 +169,23 @@ Le pipeline de collecte automatique reste utile, mais il est secondaire : c'est
 lui qui posera le plus de problèmes techniques (voir les points de vigilance) pour
 le moins de valeur. Le partage est simple à implémenter et transforme l'usage.
 
+**Constat vérifié sur appareil (20/07/2026)** : les apps officielles LinkedIn ET
+France Travail (Parcours Emploi) ne partagent **qu'une URL nue**, sans titre ni
+entreprise. Le parseur détecte bien la source depuis l'URL et, fidèle à la règle
+« ne brode jamais », admet l'inconnue et demande à l'utilisateur de compléter
+titre + entreprise, au lieu d'inventer. Deux conséquences actées :
+
+1. **Déduplication sur l'URL** (`dedupHash`, fait) : quand une URL est présente,
+   elle est l'identité de l'offre. Sans ça, un même partage re-tapé avec un titre
+   légèrement différent créait un doublon. Repli sur le hash titre+entreprise
+   pour les offres sans URL.
+2. **Résolution d'URL France Travail** (piste, étape 6) : une fois les
+   identifiants FT en place pour la collecte, une URL `francetravail.fr` partagée
+   pourra être résolue via l'API (l'identifiant de l'offre est dans l'URL) pour
+   remplir titre/entreprise/description automatiquement. Le geste passe de
+   « partager puis tout retaper » à « partager, c'est fait ». C'est la vraie
+   réponse à la friction du partage URL seule.
+
 ## Ordre de construction
 
 Chaque étape est utilisable seule, et on ne passe à la suivante qu'une fois la

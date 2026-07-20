@@ -134,6 +134,12 @@ sans quitter l'application.
 ## Étape 6 : collecte automatique
 
 - [ ] `lib/sources/france_travail.dart` : OAuth client_credentials, recherche
+- [ ] **Résolution d'URL partagée** : une URL `francetravail.fr` reçue par
+      partage porte l'identifiant de l'offre (ex. `.../detail/211FDFG`). Une fois
+      les identifiants FT en place ici, résoudre cet id via l'API pour remplir
+      titre/entreprise/description dans l'écran de réception, au lieu de laisser
+      l'utilisateur tout retaper (constat 20/07 : LinkedIn et FT ne partagent
+      qu'une URL nue). Voir PLAN « La cible de partage ».
 - [ ] `lib/sources/lba.dart` : La Bonne Alternance
 - [ ] `lib/sources/normalize.dart` : porter depuis `reference/sources.mjs`
 - [ ] Écran de liste : offres triées par score, triage au balayage
