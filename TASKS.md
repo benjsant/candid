@@ -64,10 +64,13 @@ assets se lisent.
 - [x] Enregistrer l'offre en base, avec dédup par hash
 - [ ] Lors du test sur appareil : capturer les textes **réellement** partagés
       et les figer en fixtures dans `test/shared_text_test.dart` (harnais
-      `capturesReelles`). Fait : LinkedIn (19/07/2026, URL seule — aucune
-      regex de titre ne verra jamais un partage LinkedIn). Restent : Indeed,
-      WTTJ, HelloWork. Les regex actuelles restent des suppositions pour ces
-      sources-là ; ne pas les « améliorer » sans capture réelle.
+      `capturesReelles`). Fait : LinkedIn (app, 19/07), France Travail (app,
+      20/07), WTTJ (navigateur, 20/07) — **tous URL seule**. Enseignement
+      transversal : même le navigateur n'envoie que l'URL dans `EXTRA_TEXT`, le
+      titre de page part dans `EXTRA_SUBJECT` non lu (piste PLAN : le lire en
+      natif). Les regex « Titre chez Entreprise » ne se déclenchent donc sur
+      aucune source réelle testée. Reste Indeed (app derrière login) et
+      HelloWork. Ne pas « améliorer » les regex sans capture réelle.
 
 **Acceptation :** partager une offre depuis l'application LinkedIn officielle crée
 l'entrée en base, avec un titre et une entreprise corrects, et un score cohérent.

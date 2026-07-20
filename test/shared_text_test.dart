@@ -56,6 +56,23 @@ const capturesReelles = <CaptureReelle>[
     entreprise: null,
     source: 'france_travail',
   ),
+  // Capturé le 20/07/2026 via le navigateur (DuckDuckGo sur l'Oppo) sur
+  // welcometothejungle.com, partagé vers Candid. Texte relevé dans « Texte
+  // partagé » de l'écran de réception. Enseignement majeur : même le partage
+  // NAVIGATEUR n'envoie que l'URL dans EXTRA_TEXT. Le titre de page (ici
+  // « Jobs | Welcome to the Jungle ») était affiché dans la feuille de partage
+  // système mais vit dans EXTRA_SUBJECT de l'intent, que `receive_sharing_intent`
+  // ne remonte pas. Donc, comme les apps, on n'a que l'URL. Piste d'amélioration
+  // notée dans PLAN : lire EXTRA_SUBJECT en natif pré-remplirait le titre depuis
+  // les partages navigateur (sur une vraie page d'offre, le <title> porte le
+  // poste et l'entreprise).
+  CaptureReelle(
+    nom: 'WTTJ, partage navigateur : URL seule (titre dans EXTRA_SUBJECT)',
+    brut: 'https://www.welcometothejungle.com/fr/jobs?query=d%C3%A9veloppeur',
+    titre: null,
+    entreprise: null,
+    source: 'wttj',
+  ),
 ];
 
 void main() {

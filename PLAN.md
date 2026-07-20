@@ -171,9 +171,11 @@ le moins de valeur. Le partage est simple à implémenter et transforme l'usage.
 
 **Constat vérifié sur appareil (20/07/2026)** : les apps officielles LinkedIn ET
 France Travail (Parcours Emploi) ne partagent **qu'une URL nue**, sans titre ni
-entreprise. Le parseur détecte bien la source depuis l'URL et, fidèle à la règle
-« ne brode jamais », admet l'inconnue et demande à l'utilisateur de compléter
-titre + entreprise, au lieu d'inventer. Deux conséquences actées :
+entreprise — et le **partage navigateur** (WTTJ via DuckDuckGo, vérifié aussi le
+20/07) fait pareil du point de vue de Candid. Le parseur détecte bien la source
+depuis l'URL et, fidèle à la règle « ne brode jamais », admet l'inconnue et
+demande à l'utilisateur de compléter titre + entreprise, au lieu d'inventer.
+Trois conséquences actées :
 
 1. **Déduplication sur l'URL** (`dedupHash`, fait) : quand une URL est présente,
    elle est l'identité de l'offre. Sans ça, un même partage re-tapé avec un titre
@@ -185,6 +187,15 @@ titre + entreprise, au lieu d'inventer. Deux conséquences actées :
    remplir titre/entreprise/description automatiquement. Le geste passe de
    « partager puis tout retaper » à « partager, c'est fait ». C'est la vraie
    réponse à la friction du partage URL seule.
+3. **Lire `EXTRA_SUBJECT`** (piste, à évaluer) : le partage navigateur affiche
+   pourtant le titre de page (« Jobs | Welcome to the Jungle ») dans la feuille
+   système. Ce titre voyage dans l'extra `EXTRA_SUBJECT` de l'intent, que
+   `receive_sharing_intent` ne remonte pas (il ne lit que `EXTRA_TEXT`). Le
+   récupérer en natif (petit `MethodChannel` côté Android, ou plugin qui l'expose)
+   pré-remplirait le titre depuis les partages navigateur : sur une vraie page
+   d'offre, le `<title>` porte en général le poste et l'entreprise. Ça ne coûte
+   rien côté friction et ne viole pas « ne brode jamais » (c'est une donnée
+   réelle fournie par la source, pas une invention).
 
 ## Ordre de construction
 

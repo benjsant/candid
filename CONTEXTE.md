@@ -50,8 +50,14 @@ parité). Contrat central : ne jamais broder, ne rien envoyer sans l'utilisateur
   (« Dev IA » puis « Developpeur IA H/F ») → une seule entrée, « Vous aviez
   déjà cette offre ». Base tirée de l'appareil : hash = `sha256('url:'+canonUrl)`
   confirmé, et les index `idx_offers_*` sont bien présents.
-- **`capturesReelles`** : LinkedIn et France Travail figés (URL seule). Manque
-  Indeed, WTTJ, HelloWork, à capturer quand l'occasion se présente.
+- **`capturesReelles`** : LinkedIn (app), France Travail (app) et WTTJ
+  (navigateur) figés — tous URL seule. Indeed = app derrière un mur de connexion
+  (non contourné, on ne crée pas de compte). Reste HelloWork.
+- **Découverte 20/07 (soir) : `EXTRA_SUBJECT`.** Le partage navigateur affiche
+  le titre de page dans la feuille système, mais ce titre part dans
+  `EXTRA_SUBJECT` de l'intent, que `receive_sharing_intent` ne remonte pas (il ne
+  lit que `EXTRA_TEXT` = l'URL). Piste : le lire en natif pré-remplirait le titre
+  depuis les partages navigateur. Notée dans PLAN « La cible de partage ».
 - **`linux/`** : scaffolding desktop généré par Flutter, commité le 20/07.
   Inoffensif (permet de lancer l'UI sur PC), à retirer si on veut Android pur.
 
