@@ -80,9 +80,19 @@ class LlmException implements Exception {
   String toString() => message;
 }
 
+/// Contrat d'appel LLM, pour que le graphe dépende d'une abstraction (et qu'on
+/// puisse injecter un faux fournisseur dans les tests).
+abstract class LlmGateway {
+  Future<Map<String, dynamic>> completeJson({
+    required String systemPrompt,
+    required String userMessage,
+    double temperature,
+  });
+}
+
 /// Client d'appel. Une seule opération : un prompt système + un message
 /// utilisateur, en attendant un objet JSON en réponse.
-class LlmClient {
+class LlmClient implements LlmGateway {
   LlmClient(this.config, {Dio? dio}) : _dio = dio ?? Dio();
 
   final LlmConfig config;
@@ -93,6 +103,7 @@ class LlmClient {
   /// [systemPrompt] est le préfixe stable (cache) ; [userMessage] est la partie
   /// variable (l'offre). [temperature] : basse pour le scoring reproductible,
   /// plus haute pour l'accroche créative.
+  @override
   Future<Map<String, dynamic>> completeJson({
     required String systemPrompt,
     required String userMessage,
