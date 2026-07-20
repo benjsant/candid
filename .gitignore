@@ -1,6 +1,9 @@
 # Miscellaneous
 *.class
 *.lock
+# Exception : pour une APPLICATION, pubspec.lock se versionne (builds
+# reproductibles). Le `*.lock` ci-dessus l'aurait ignoré.
+!pubspec.lock
 *.log
 *.pyc
 *.swp

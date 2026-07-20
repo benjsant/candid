@@ -186,15 +186,14 @@ int scoreOffer(ScorableOffer offer, [Prefs prefs = const Prefs()]) {
   return score.clamp(0, 100);
 }
 
-/// Résultat de l'annotation : le hash, le score, et le verdict d'exclusion.
+/// Résultat de l'annotation : le score et le verdict d'exclusion.
+///
+/// La clé de déduplication n'est plus portée ici : le dépôt la calcule via
+/// `dedupHash` (dédup sur l'URL quand elle existe, repli sur le hash
+/// titre+entreprise sinon). Voir `hash.dart`.
 class Annotated {
-  const Annotated({
-    required this.hash,
-    required this.score,
-    required this.excluded,
-  });
+  const Annotated({required this.score, required this.excluded});
 
-  final String hash;
   final int score;
 
   /// `true` si l'offre tombe sous une exclusion du profil : elle doit être
@@ -204,11 +203,6 @@ class Annotated {
 
 Annotated annotate(ScorableOffer offer, [Prefs prefs = const Prefs()]) {
   return Annotated(
-    hash: computeHash(
-      title: offer.title,
-      company: offer.company,
-      location: offer.location,
-    ),
     score: scoreOffer(offer, prefs),
     excluded: matchesExclusions(offer, prefs.exclusions),
   );
