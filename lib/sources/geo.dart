@@ -34,6 +34,65 @@ class Commune {
 
 const _url = 'https://geo.api.gouv.fr/communes';
 
+/// Coordonnées d'une commune. La Bonne Alternance cherche par latitude et
+/// longitude, là où France Travail cherche par code INSEE : on résout donc le
+/// code au moment de la collecte plutôt que de stocker deux formats.
+class LatLng {
+  const LatLng(this.latitude, this.longitude);
+  final double latitude;
+  final double longitude;
+}
+
+/// Résout des codes INSEE en coordonnées. Les codes absents ou refusés sont
+/// simplement omis du résultat : une commune non résolue ne bloque pas les
+/// autres.
+Future<Map<String, LatLng>> communeCoordinates(
+  List<String> inseeCodes, {
+  Dio? dio,
+}) async {
+  final codes = inseeCodes.where((c) => c.trim().isNotEmpty).toList();
+  if (codes.isEmpty) return const {};
+
+  // Un code par requête. `code=59606,59350` répond « 200 [] » : l'API n'accepte
+  // PAS de liste sur ce paramètre, et le dit en rendant zéro résultat plutôt
+  // qu'une erreur (constat du 21/07/2026, après avoir supposé le contraire).
+  // Les communes d'un profil se comptent sur les doigts d'une main.
+  final client = dio ?? Dio();
+  final out = <String, LatLng>{};
+
+  for (final code in codes) {
+    try {
+      final response = await client.get<dynamic>(
+        _url,
+        queryParameters: {'code': code, 'fields': 'code,centre'},
+        options: Options(validateStatus: (_) => true),
+      );
+      if (response.statusCode != 200) continue;
+      final body = response.data;
+      if (body is! List) continue;
+
+      for (final raw in body.whereType<Map>()) {
+        final m = raw.cast<String, dynamic>();
+        final found = (m['code'] ?? '').toString();
+        final centre = m['centre'];
+        final coords = centre is Map ? centre['coordinates'] : null;
+        // GeoJSON : [longitude, latitude], dans cet ordre. L'inverser enverrait
+        // la recherche à l'autre bout du monde sans lever d'erreur.
+        if (found.isNotEmpty && coords is List && coords.length >= 2) {
+          out[found] = LatLng(
+            (coords[1] as num).toDouble(),
+            (coords[0] as num).toDouble(),
+          );
+        }
+      }
+    } on DioException {
+      // Une commune injoignable n'empêche pas les autres.
+      continue;
+    }
+  }
+  return out;
+}
+
 /// Cherche des communes par nom. Rend une liste vide en cas d'échec : c'est une
 /// aide à la saisie, pas une étape bloquante.
 Future<List<Commune>> searchCommunes(String query, {Dio? dio}) async {

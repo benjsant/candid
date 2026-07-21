@@ -9,6 +9,7 @@ import 'package:candid/data/offers_repository.dart';
 import 'package:candid/data/profile_repository.dart';
 import 'package:candid/sources/collect_service.dart';
 import 'package:candid/sources/france_travail.dart';
+import 'package:candid/sources/lba.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -55,6 +56,10 @@ void main() {
         db: db,
         repository: repo,
         franceTravail: FranceTravailClient(
+          secrets: Secrets(),
+          dio: Dio()..interceptors.add(transport),
+        ),
+        lba: LbaClient(
           secrets: Secrets(),
           dio: Dio()..interceptors.add(transport),
         ),

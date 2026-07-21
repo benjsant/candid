@@ -22,6 +22,7 @@ import 'data/offers_repository.dart';
 import 'data/profile_repository.dart';
 import 'sources/collect_service.dart';
 import 'sources/france_travail.dart';
+import 'sources/lba.dart';
 import 'sources/shared_text.dart';
 import 'ui/offers_screen.dart';
 import 'ui/receive_share_screen.dart';
@@ -46,6 +47,7 @@ Future<void> main() async {
         db: db,
         repository: repository,
         franceTravail: FranceTravailClient(secrets: secrets),
+        lba: LbaClient(secrets: secrets),
       ),
       secrets: secrets,
       prefs: prefs,
@@ -207,6 +209,14 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(report.summary)));
+      }
+    } catch (e) {
+      // Sans ce catch, une erreur inattendue ne produirait AUCUN message :
+      // l'utilisateur verrait le bouton s'arrêter de tourner sans savoir si la
+      // collecte a marché. Une panne doit se voir.
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Collecte impossible : $e')));
       }
     } finally {
       // Le bouton doit toujours se réarmer, même si une source a échoué de

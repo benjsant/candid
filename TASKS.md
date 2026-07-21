@@ -195,7 +195,24 @@ partage (Drive, Gmail, fichiers).
       entières), espaces sinon. Résultats fusionnés et dédoublonnés par
       identifiant de source avant enregistrement, pour que le bilan reste
       compréhensible.
-- [ ] `lib/sources/lba.dart` : La Bonne Alternance
+- [x] `lib/sources/lba.dart` **fait** : `/api/job/v1/search`, clé en Bearer,
+      recherche par latitude/longitude + rayon + codes ROME (défaut M1805).
+      Les coordonnées sont résolues à la collecte depuis les codes INSEE du
+      profil (`geo.dart`), pour ne pas stocker deux formats de localisation.
+      **Les `recruiters` ne sont pas enregistrés comme des offres** : ce sont
+      des entreprises sans poste publié, en faire des annonces serait inventer.
+      Ils sont comptés et affichés dans le bilan (candidature spontanée = étape 7).
+      ✅ Vérifié en réel (21/07) : 2 offres d'alternance enregistrées, ~297
+      entreprises à démarcher signalées.
+- [ ] **Piège `geo.api.gouv.fr`** : le paramètre `code` n'accepte **pas** de
+      liste. `code=59606,59350` répond « 200 [] », sans erreur. Un appel par
+      commune. Avoir supposé l'inverse désactivait silencieusement toute la
+      source LBA (« aucune commune localisable »). Verrouillé par un test.
+- [ ] **Limite connue : la dédup inter-sources est syntaxique.** Une même offre
+      arrivée par France Travail et par LBA peut passer deux fois si l'entreprise
+      est nommée d'un côté et vide de l'autre (cas vu à Roubaix). Le hash porte
+      sur titre + entreprise + lieu. La vraie réponse est la dédup sémantique,
+      déjà prévue en étape 7.
 - [ ] `lib/sources/normalize.dart` : porter depuis `reference/sources.mjs`
 - [ ] Écran de liste : offres triées par score, triage au balayage
 - [ ] « Re-scorer » : recalculer les scores des offres en attente quand le

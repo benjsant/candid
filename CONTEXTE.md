@@ -123,6 +123,14 @@ un peu moins par appareil.
 
 ## Journal
 
+- **21/07/2026 (nuit)** : La Bonne Alternance branchée et vérifiée (2 offres
+  d'alternance, ~297 entreprises à démarcher signalées mais NON enregistrées :
+  sans poste publié, en faire des offres serait inventer). Trois enseignements.
+  (1) `geo.api.gouv.fr` refuse les listes sur `code` et répond « 200 [] » : mon
+  hypothèse de requête groupée désactivait silencieusement toute la source.
+  (2) Une API qui répond 200 avec un corps vide est plus dangereuse qu'une qui
+  échoue : rien dans les logs, rien à l'écran. (3) `_collect` n'attrapait aucune
+  exception, donc une panne inattendue n'aurait produit AUCUN message. Corrigé.
 - **21/07/2026 (soir)** : profil de recherche fait et vérifié (Valenciennes,
   INSEE 59606, 30 km → 9 offres locales, aucune hors 59/62). Deux pièges France
   Travail documentés, tous deux trouvés en testant en vrai, aucun visible en
