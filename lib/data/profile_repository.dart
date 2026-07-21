@@ -19,6 +19,54 @@ import 'database.dart';
 /// le nommer.
 const kDefaultProfileName = 'principal';
 
+/// Séparateur des libellés de communes. Volontairement différent de la virgule,
+/// qui sert aux **codes** : « Valenciennes (59) » n'en contient pas, mais un
+/// libellé futur pourrait, et on ne veut pas d'ambiguïté à la relecture.
+const _labelSeparator = ' ; ';
+
+/// Les communes du profil, telles que stockées.
+///
+/// Plusieurs communes tiennent dans les colonnes existantes : les codes sont
+/// joints par des virgules, ce qui est **exactement** ce qu'attend le paramètre
+/// `commune` de France Travail (vérifié le 21/07/2026 : `59606,31555` renvoie
+/// bien des offres des deux départements, c'est une union). Aucun changement de
+/// schéma, donc aucune migration à écrire alors qu'une installation réelle
+/// existe déjà sur le téléphone.
+class ProfileCommunes {
+  const ProfileCommunes(this.labels, this.codes);
+
+  final List<String> labels;
+  final List<String> codes;
+
+  bool get isEmpty => codes.isEmpty;
+  int get length => codes.length;
+
+  /// Ce qui part dans la requête : « 59606,59350 ».
+  String get query => codes.join(',');
+
+  static ProfileCommunes parse(String? labels, String? codes) {
+    final c = (codes ?? '')
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    final l = (labels ?? '')
+        .split(_labelSeparator)
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    // Les deux listes doivent rester alignées : si un stockage ancien ou abîmé
+    // les désaccorde, on retombe sur le code, qui est ce qui compte.
+    return ProfileCommunes(
+      l.length == c.length ? l : c,
+      c,
+    );
+  }
+
+  String get storedLabels => labels.join(_labelSeparator);
+  String get storedCodes => codes.join(',');
+}
+
 class ProfileRepository {
   ProfileRepository(this._db);
 

@@ -54,6 +54,49 @@ void main() {
     expect(p.exclusions, isNull);
   });
 
+  group('plusieurs communes', () {
+    test('codes joints par des virgules : c\'est ce qu\'attend l\'API', () {
+      const c = ProfileCommunes(
+        ['Valenciennes (59)', 'Lille (59)'],
+        ['59606', '59350'],
+      );
+      expect(c.query, '59606,59350');
+      expect(c.length, 2);
+    });
+
+    test('aller-retour stockage sans perte', () async {
+      const saisi = ProfileCommunes(
+        ['Valenciennes (59)', 'Lille (59)', 'Douai (59)'],
+        ['59606', '59350', '59178'],
+      );
+      await repo.save(
+        keywords: 'python',
+        locationLabel: saisi.storedLabels,
+        locationInsee: saisi.storedCodes,
+        radiusKm: 30,
+      );
+
+      final p = (await repo.active())!;
+      final relu = ProfileCommunes.parse(p.locationLabel, p.locationInsee);
+      expect(relu.codes, saisi.codes);
+      expect(relu.labels, saisi.labels);
+      expect(relu.query, '59606,59350,59178');
+    });
+
+    test('libellés désaccordés : on retombe sur les codes', () {
+      // Robustesse : les codes sont ce qui pilote la requête, ils priment.
+      final c = ProfileCommunes.parse('Lille (59)', '59350,59606');
+      expect(c.codes, ['59350', '59606']);
+      expect(c.labels, ['59350', '59606']);
+    });
+
+    test('aucune commune : vide, pas de virgule parasite', () {
+      final c = ProfileCommunes.parse('', '');
+      expect(c.isEmpty, isTrue);
+      expect(c.query, '');
+    });
+  });
+
   test('le profil alimente bien le scoring', () async {
     await repo.save(
       keywords: 'python ia',

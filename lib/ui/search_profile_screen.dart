@@ -30,9 +30,11 @@ class _SearchProfileScreenState extends State<SearchProfileScreen> {
   String _seniority = '';
   int? _radiusKm = 30;
 
-  /// Commune retenue. Tant qu'elle est nulle, la recherche n'est pas bornée
-  /// géographiquement, et on le dit clairement à l'écran.
-  Commune? _selected;
+  /// Communes retenues. Tant que la liste est vide, la recherche n'est pas
+  /// bornée géographiquement, et on le dit clairement à l'écran. France Travail
+  /// accepte plusieurs codes INSEE en une requête, donc en ajouter ne coûte
+  /// aucun appel supplémentaire.
+  final List<Commune> _selected = [];
   List<Commune> _suggestions = const [];
   bool _searching = false;
   bool _loading = true;
@@ -63,13 +65,15 @@ class _SearchProfileScreenState extends State<SearchProfileScreen> {
           ? (p?.seniority ?? '')
           : '';
       _radiusKm = p?.radiusKm ?? 30;
-      _commune.text = p?.locationLabel ?? '';
-      if (p?.locationInsee != null && p?.locationLabel != null) {
-        _selected = Commune(
-          name: p!.locationLabel!,
-          inseeCode: p.locationInsee!,
-        );
-      }
+      _commune.clear();
+      final stored =
+          ProfileCommunes.parse(p?.locationLabel, p?.locationInsee);
+      _selected
+        ..clear()
+        ..addAll([
+          for (var i = 0; i < stored.codes.length; i++)
+            Commune(name: stored.labels[i], inseeCode: stored.codes[i]),
+        ]);
       _loading = false;
     });
   }
@@ -93,11 +97,15 @@ class _SearchProfileScreenState extends State<SearchProfileScreen> {
   }
 
   Future<void> _save() async {
+    final communes = ProfileCommunes(
+      _selected.map((c) => c.label).toList(),
+      _selected.map((c) => c.inseeCode).toList(),
+    );
     await widget.repository.save(
       keywords: _keywords.text,
-      locationLabel: _selected?.label,
-      locationInsee: _selected?.inseeCode,
-      radiusKm: _selected == null ? null : _radiusKm,
+      locationLabel: communes.storedLabels,
+      locationInsee: communes.storedCodes,
+      radiusKm: communes.isEmpty ? null : _radiusKm,
       contractTypes: _contracts.text,
       seniority: _seniority,
       mustHave: _mustHave.text,
@@ -137,8 +145,8 @@ class _SearchProfileScreenState extends State<SearchProfileScreen> {
                 TextField(
                   controller: _commune,
                   decoration: InputDecoration(
-                    labelText: 'Ville',
-                    hintText: 'Valenciennes, Lille…',
+                    labelText: 'Ajouter une ville',
+                    hintText: 'Valenciennes, puis Lille, Douai…',
                     border: const OutlineInputBorder(),
                     suffixIcon: _searching
                         ? const Padding(
@@ -166,15 +174,17 @@ class _SearchProfileScreenState extends State<SearchProfileScreen> {
                       title: Text(c.label),
                       subtitle: Text('Code INSEE ${c.inseeCode}'),
                       onTap: () => setState(() {
-                        _selected = c;
-                        _commune.text = c.label;
+                        if (!_selected.any((x) => x.inseeCode == c.inseeCode)) {
+                          _selected.add(c);
+                        }
+                        _commune.clear();
                         _suggestions = const [];
                       }),
                     ),
                   ),
                 ],
                 const SizedBox(height: 8),
-                if (_selected == null)
+                if (_selected.isEmpty)
                   Row(
                     children: [
                       Icon(Icons.warning_amber_outlined,
@@ -191,31 +201,32 @@ class _SearchProfileScreenState extends State<SearchProfileScreen> {
                     ],
                   )
                 else ...[
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
-                      const Icon(Icons.check_circle_outline, size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '${_selected!.label} · code INSEE '
-                          '${_selected!.inseeCode}',
-                          style: Theme.of(context).textTheme.bodySmall,
+                      for (final c in _selected)
+                        InputChip(
+                          avatar: const Icon(Icons.place_outlined, size: 18),
+                          label: Text(c.label),
+                          onDeleted: () =>
+                              setState(() => _selected.remove(c)),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () => setState(() {
-                          _selected = null;
-                          _commune.clear();
-                        }),
-                        child: const Text('Retirer'),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
+                  Text(
+                    _selected.length == 1
+                        ? 'Une commune retenue.'
+                        : '${_selected.length} communes retenues, '
+                            'interrogées ensemble.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
                   DropdownButtonFormField<int>(
                     initialValue: _radiusKm,
                     decoration: const InputDecoration(
-                      labelText: 'Rayon',
+                      labelText: 'Rayon autour de chaque commune',
                       border: OutlineInputBorder(),
                     ),
                     items: const [10, 20, 30, 50, 100]

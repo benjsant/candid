@@ -143,16 +143,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           stream: widget.profiles.watchActive(),
           builder: (context, snapshot) {
             final profile = snapshot.data;
-            final place = profile?.locationLabel;
+            final communes = ProfileCommunes.parse(
+                profile?.locationLabel, profile?.locationInsee);
             return Card(
               margin: EdgeInsets.zero,
               child: ListTile(
                 leading: const Icon(Icons.tune),
                 title: const Text('Profil de recherche'),
                 subtitle: Text(
-                  place == null
+                  communes.isEmpty
                       ? 'Aucune commune : la collecte ratisse toute la France.'
-                      : '$place, ${profile?.radiusKm ?? 30} km',
+                      : '${communes.labels.join(', ')} · '
+                          '${profile?.radiusKm ?? 30} km',
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).push(
