@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ (API 31). On exclut tout : rien de Candid ne doit sortir de
+     l'appareil par une sauvegarde cloud ou un transfert d'appareil à appareil.
+     Les secrets vivent dans le Keystore, l'historique dans le SQLite local, et
+     la sauvegarde voulue par l'utilisateur passe par l'export JSON explicite. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="file" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="file" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>

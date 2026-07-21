@@ -1,7 +1,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- allowBackup="false" : l'application détient des secrets (clés LLM,
+         identifiants France Travail) dans le Keystore, et tout l'historique de
+         candidatures. Android sauvegarde par défaut les shared_prefs, ce qui
+         ferait sortir le fichier chiffré de l'appareil. Il resterait
+         indéchiffrable sans le Keystore (non exportable), mais autant ne pas
+         l'exposer du tout. La sauvegarde volontaire passe par l'export JSON de
+         l'onglet Suivi, qui lui ne contient aucun secret.
+         dataExtractionRules couvre Android 12+ (transfert d'appareil à
+         appareil), fullBackupContent les versions antérieures. -->
     <application
         android:label="Candid"
         android:name="${applicationName}"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
