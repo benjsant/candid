@@ -182,12 +182,19 @@ partage (Drive, Gmail, fichiers).
       appui : 157 offres en base pour 157 hash distincts, **zéro doublon** —
       critère d'acceptation de l'étape tenu. 72 offres sans entreprise
       (anonymisées à la source) : champ laissé vide, jamais comblé.
-- [ ] **Profil de recherche (bloquant découvert le 21/07)** : sans profil, la
-      requête part sans `commune` ni `distance`, donc la collecte ratisse toute
-      la France (Toulouse, Lyon, Montpellier remontent à 92). `isOutOfZone` ne
-      filtre que l'étranger, pas les villes françaises lointaines. Le client
-      accepte déjà `communeInsee` et `radiusKm` : il manque l'écran qui crée le
-      profil. À faire avant la collecte périodique, sinon elle notifiera du bruit.
+- [x] **Profil de recherche fait** (`profile_repository.dart`,
+      `search_profile_screen.dart`, `geo.dart`) : ville résolue en code INSEE via
+      `geo.api.gouv.fr` (sans clé), rayon, mots-clés, niveau, contrats,
+      indispensables, exclusions. L'écran avertit tant qu'aucune commune n'est
+      retenue. ✅ Vérifié en réel : Valenciennes → INSEE 59606, rayon 30 km →
+      **9 offres, aucune hors 59/62** (contre 150 dans toute la France avant).
+- [x] **Piège France Travail : `motsCles` est un ET, limité à 3 mots.**
+      « développeur python intelligence artificielle » renvoyait 204 (zéro),
+      « python » seul 7 offres. La collecte envoie donc **une requête par
+      terme** : virgules si l'utilisateur en met (les expressions restent
+      entières), espaces sinon. Résultats fusionnés et dédoublonnés par
+      identifiant de source avant enregistrement, pour que le bilan reste
+      compréhensible.
 - [ ] `lib/sources/lba.dart` : La Bonne Alternance
 - [ ] `lib/sources/normalize.dart` : porter depuis `reference/sources.mjs`
 - [ ] Écran de liste : offres triées par score, triage au balayage

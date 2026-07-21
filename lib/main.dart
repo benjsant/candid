@@ -19,6 +19,7 @@ import 'data/applications_repository.dart';
 import 'data/database.dart';
 import 'data/export_service.dart';
 import 'data/offers_repository.dart';
+import 'data/profile_repository.dart';
 import 'sources/collect_service.dart';
 import 'sources/france_travail.dart';
 import 'sources/shared_text.dart';
@@ -40,6 +41,7 @@ Future<void> main() async {
       repository: repository,
       applications: ApplicationsRepository(db),
       export: ExportService(db),
+      profiles: ProfileRepository(db),
       collect: CollectService(
         db: db,
         repository: repository,
@@ -58,6 +60,7 @@ class CandidApp extends StatelessWidget {
     required this.repository,
     required this.applications,
     required this.export,
+    required this.profiles,
     required this.collect,
     required this.secrets,
     required this.prefs,
@@ -67,6 +70,7 @@ class CandidApp extends StatelessWidget {
   final OffersRepository repository;
   final ApplicationsRepository applications;
   final ExportService export;
+  final ProfileRepository profiles;
   final CollectService collect;
   final Secrets secrets;
   final AppPrefs prefs;
@@ -95,6 +99,7 @@ class CandidApp extends StatelessWidget {
           repository: repository,
           applications: applications,
           export: export,
+          profiles: profiles,
           collect: collect,
           secrets: secrets,
           prefs: prefs,
@@ -111,6 +116,7 @@ class HomeScreen extends StatefulWidget {
     required this.repository,
     required this.applications,
     required this.export,
+    required this.profiles,
     required this.collect,
     required this.secrets,
     required this.prefs,
@@ -120,6 +126,7 @@ class HomeScreen extends StatefulWidget {
   final OffersRepository repository;
   final ApplicationsRepository applications;
   final ExportService export;
+  final ProfileRepository profiles;
   final CollectService collect;
   final Secrets secrets;
   final AppPrefs prefs;
@@ -146,6 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
       secrets: widget.secrets,
       prefs: widget.prefs,
       themeMode: widget.themeMode,
+      profiles: widget.profiles,
     ),
   ];
 

@@ -123,6 +123,15 @@ un peu moins par appareil.
 
 ## Journal
 
+- **21/07/2026 (soir)** : profil de recherche fait et vérifié (Valenciennes,
+  INSEE 59606, 30 km → 9 offres locales, aucune hors 59/62). Deux pièges France
+  Travail documentés, tous deux trouvés en testant en vrai, aucun visible en
+  test unitaire : (1) `motsCles` est un **ET** limité à 3 mots, donc une liste
+  de mots-clés y renvoie zéro ; on envoie une requête par terme. (2) Un
+  utilisateur qui n'écrit pas de virgule attend quand même plusieurs
+  recherches : sans repli sur les espaces, il obtient zéro résultat sans
+  explication. Leçon générale : les paramètres d'API se vérifient contre
+  l'API, pas contre l'intuition.
 - **21/07/2026 (fin de journée)** : étape 6, palier 1. Collecte France Travail
   vérifiée en réel (150 offres, dédup confirmée : 157 lignes / 157 hash). Deux
   enseignements. (1) **Il manque un profil de recherche** : sans lui, la requête

@@ -14,6 +14,7 @@ import '../data/database.dart';
 import '../data/offers_repository.dart';
 import '../domain/scoring.dart';
 import 'france_travail.dart';
+import 'normalize.dart';
 
 /// Bilan d'une collecte, affichable tel quel.
 class CollectReport {
@@ -86,13 +87,31 @@ class CollectService {
 
     if (await _franceTravail.isConfigured) {
       try {
-        final offers = await _franceTravail.search(
-          keywords: profile?.keywords ?? _defaultKeywords,
-          communeInsee: profile?.locationInsee,
-          radiusKm: profile?.radiusKm,
-        );
-        fetched += offers.length;
-        for (final o in offers) {
+        // Dédoublonné par identifiant de source dès la collecte : une même
+        // offre remonte souvent sur plusieurs termes (« développeur » et
+        // « python »). Sans ça, le bilan annoncerait « 2 nouvelles sur 6 »,
+        // ce qui est exact mais incompréhensible.
+        final byId = <String, NormalizedOffer>{};
+        // Une requête PAR mot-clé, et non une requête avec tous les mots.
+        // France Travail fait un ET entre les termes de `motsCles` : vérifié le
+        // 21/07/2026, « développeur python intelligence artificielle » près de
+        // Valenciennes renvoyait 204 (zéro), là où « python » seul en donnait 7.
+        // Les doublons entre requêtes sont absorbés par la dédup par hash.
+        for (final term in _queryTerms(profile?.keywords)) {
+          final found = await _franceTravail.search(
+            keywords: term,
+            communeInsee: profile?.locationInsee,
+            radiusKm: profile?.radiusKm,
+          );
+          for (final o in found) {
+            byId.putIfAbsent(
+              o.sourceId.isNotEmpty ? o.sourceId : '${o.title}|${o.company}',
+              () => o,
+            );
+          }
+        }
+        fetched += byId.length;
+        for (final o in byId.values) {
           final result = await _repository.save(
             source: o.source,
             title: o.title,
@@ -143,7 +162,36 @@ class CollectService {
     return query.getSingleOrNull();
   }
 
-  /// Requête de repli : les mots-clés du scoring, qui décrivent déjà le profil
-  /// visé. On ne cherche pas à deviner autre chose.
-  static const _defaultKeywords = 'développeur python intelligence artificielle';
+  /// Découpe les mots-clés du profil en **requêtes séparées**, une par terme.
+  ///
+  /// France Travail fait un ET entre les mots de `motsCles`, et n'en accepte
+  /// que trois au maximum. Envoyer toute la liste du profil revient donc à ne
+  /// rien trouver.
+  ///
+  /// La virgule sépare les recherches, ce qui préserve les expressions comme
+  /// « intelligence artificielle ». **Sans virgule, on sépare sur les espaces** :
+  /// quelqu'un qui tape « développeur python ia » veut trois recherches, pas une
+  /// offre contenant les trois mots. Sans cette règle, il obtient zéro résultat
+  /// sans comprendre pourquoi (constat du 21/07/2026, sur cette même saisie).
+  static List<String> _queryTerms(String? keywords) {
+    final raw = (keywords ?? '').trim();
+    if (raw.isEmpty) return _defaultTerms;
+
+    final parts = raw.contains(',') ? raw.split(',') : raw.split(RegExp(r'\s+'));
+    final terms = parts
+        .map((t) => t.trim().split(RegExp(r'\s+')).take(3).join(' '))
+        .where((t) => t.isNotEmpty)
+        .toList();
+
+    if (terms.isEmpty) return _defaultTerms;
+    // Chaque terme est un appel réseau : on borne pour ne pas transformer un
+    // appui sur « Collecter » en dizaine de requêtes.
+    return terms.take(_maxQueries).toList();
+  }
+
+  static const _maxQueries = 5;
+
+  /// Repli quand le profil n'existe pas encore : des termes larges, chacun
+  /// interrogé séparément.
+  static const _defaultTerms = ['développeur', 'python', 'intelligence artificielle'];
 }

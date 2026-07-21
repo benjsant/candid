@@ -10,6 +10,9 @@ import '../agent/agent_config.dart';
 import '../agent/llm.dart';
 import '../core/app_prefs.dart';
 import '../core/secrets.dart';
+import '../data/database.dart';
+import '../data/profile_repository.dart';
+import 'search_profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -17,12 +20,14 @@ class SettingsScreen extends StatefulWidget {
     required this.secrets,
     required this.prefs,
     required this.themeMode,
+    required this.profiles,
     this.agentConfig,
   });
 
   final Secrets secrets;
   final AppPrefs prefs;
   final ValueNotifier<ThemeMode> themeMode;
+  final ProfileRepository profiles;
   final AgentConfig? agentConfig;
 
   @override
@@ -129,6 +134,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 16),
+
+        // Profil de recherche : ce qui borne la collecte. Placé en premier
+        // parce que sans lui, la collecte remonte toute la France.
+        Text('Recherche', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        StreamBuilder<SearchProfile?>(
+          stream: widget.profiles.watchActive(),
+          builder: (context, snapshot) {
+            final profile = snapshot.data;
+            final place = profile?.locationLabel;
+            return Card(
+              margin: EdgeInsets.zero,
+              child: ListTile(
+                leading: const Icon(Icons.tune),
+                title: const Text('Profil de recherche'),
+                subtitle: Text(
+                  place == null
+                      ? 'Aucune commune : la collecte ratisse toute la France.'
+                      : '$place, ${profile?.radiusKm ?? 30} km',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        SearchProfileScreen(repository: widget.profiles),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        const Divider(height: 32),
 
         // Apparence.
         Text('Apparence', style: Theme.of(context).textTheme.titleSmall),
