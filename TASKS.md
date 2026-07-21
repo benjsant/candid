@@ -170,6 +170,24 @@ partage (Drive, Gmail, fichiers).
       titre/entreprise/description dans l'écran de réception, au lieu de laisser
       l'utilisateur tout retaper (constat 20/07 : LinkedIn et FT ne partagent
       qu'une URL nue). Voir PLAN « La cible de partage ».
+- [x] `lib/sources/france_travail.dart` **fait** : OAuth client_credentials +
+      `/offres/search`. URL du realm, scopes (`api_offresdemploiv2 o2dsoffre`) et
+      paramètres repris du workflow n8n, qui les a vérifiés en production. Jeton
+      mis en cache jusqu'à expiration (il vit ~25 min).
+- [x] `lib/sources/normalize.dart` **fait** : port de `reference/sources.mjs`
+      pour France Travail et La Bonne Alternance (volets `jobs` et `recruiters`).
+- [x] `lib/sources/collect_service.dart` + bouton « Collecter » **faits**.
+      ✅ Vérifié en réel sur appareil (Oppo, 21/07/2026) avec les identifiants
+      France Travail : **150 offres collectées**, scores de 12 à 92. Second
+      appui : 157 offres en base pour 157 hash distincts, **zéro doublon** —
+      critère d'acceptation de l'étape tenu. 72 offres sans entreprise
+      (anonymisées à la source) : champ laissé vide, jamais comblé.
+- [ ] **Profil de recherche (bloquant découvert le 21/07)** : sans profil, la
+      requête part sans `commune` ni `distance`, donc la collecte ratisse toute
+      la France (Toulouse, Lyon, Montpellier remontent à 92). `isOutOfZone` ne
+      filtre que l'étranger, pas les villes françaises lointaines. Le client
+      accepte déjà `communeInsee` et `radiusKm` : il manque l'écran qui crée le
+      profil. À faire avant la collecte périodique, sinon elle notifiera du bruit.
 - [ ] `lib/sources/lba.dart` : La Bonne Alternance
 - [ ] `lib/sources/normalize.dart` : porter depuis `reference/sources.mjs`
 - [ ] Écran de liste : offres triées par score, triage au balayage

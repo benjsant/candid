@@ -16,9 +16,15 @@ parité). Contrat central : ne jamais broder, ne rien envoyer sans l'utilisateur
 
 ## État au 21/07/2026
 
-- **Étapes 1 à 5 faites et validées sur appareil réel.** Oppo CPH2195,
-  Android 13. 85 tests verts, `flutter analyze` propre. Reste l'étape 6
-  (collecte automatique), qui attend les clés France Travail et LBA.
+- **Étapes 1 à 5 faites et validées sur appareil réel ; étape 6 entamée.** Oppo
+  CPH2195, Android 13. 107 tests verts, `flutter analyze` propre.
+- **Étape 6, palier 1 (France Travail manuel) fait et vérifié en réel** le
+  21/07 : 150 offres collectées, dédup tenue au second appui. Identifiants FT et
+  LBA saisis sur l'appareil (repris du `.env` du projet Docker : mêmes API,
+  mêmes credentials, aucune nouvelle inscription). Reste : profil de recherche
+  (bloquant, voir TASKS), résolution d'URL FT, LBA, workmanager.
+- **Sécurité** : `allowBackup=false` + règles d'extraction (21/07). Vérifié sur
+  appareil, `ALLOW_BACKUP` a disparu des `pkgFlags`.
 - **Étape 4 close le 21/07** : bout-en-bout avec une vraie clé DeepSeek sur une
   offre Doctolib. Score agent 85/100, accroche ancrée sur un fait recoupable au
   registre (création 2013), lettre et CV ciblé rendus. Voir TASKS pour le détail
@@ -117,6 +123,15 @@ un peu moins par appareil.
 
 ## Journal
 
+- **21/07/2026 (fin de journée)** : étape 6, palier 1. Collecte France Travail
+  vérifiée en réel (150 offres, dédup confirmée : 157 lignes / 157 hash). Deux
+  enseignements. (1) **Il manque un profil de recherche** : sans lui, la requête
+  part sans `commune` ni `distance` et ratisse toute la France ; `isOutOfZone` ne
+  filtre que l'étranger, donc Lyon et Toulouse remontent à 92. Le client accepte
+  déjà les paramètres, c'est l'écran qui manque. À faire AVANT la collecte
+  périodique, sinon elle notifiera du bruit. (2) 72 offres sur 155 n'ont pas
+  d'entreprise (anonymisées à la source) : la règle « champ vide plutôt que
+  deviné » se voit enfin en production, et elle tient.
 - **21/07/2026** : premier appel LLM réel (DeepSeek) depuis le téléphone. Étape
   4 close. Enseignement : les deux nœuds qui écrivent (analyze pour le CV,
   accroche pour la lettre) peuvent se contredire sans que rien ne soit inventé.
