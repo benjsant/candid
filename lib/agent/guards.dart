@@ -62,7 +62,19 @@ PersonnalisationCv sanitizePersonnalisation(
   PersonnalisationCv pc, {
   int cvIndexSkillsCount = 0,
   int cvIndexProjectsCount = 0,
+  String accroche = '',
 }) {
+  // 0. Cohérence lettre/CV : un projet cité dans l'accroche ne peut pas être
+  // masqué du CV. La personnalisation est décidée au nœud `analyze`, avant que
+  // l'accroche existe : sans cette règle, la lettre renvoie le recruteur vers
+  // un projet introuvable sur le CV joint.
+  if (accroche.isNotEmpty) {
+    pc = pc.copyWith(
+      hiddenProjects:
+          pc.hiddenProjects.where((p) => !_citedIn(p, accroche)).toList(),
+    );
+  }
+
   // 1. Retire des masqués tout ce qui est aussi mis en avant.
   final hiSkills = pc.highlightSkills.toSet();
   final hiProjects = pc.highlightProjects.toSet();
@@ -84,4 +96,13 @@ PersonnalisationCv sanitizePersonnalisation(
   }
 
   return pc.copyWith(hiddenSkills: hiddenSkills, hiddenProjects: hiddenProjects);
+}
+
+/// Vrai si [project] est nommé dans [text]. Les entrées du cv-index portent
+/// souvent un libellé long (« InfiniDex - Pokédex augmenté par IA ») alors que
+/// l'accroche ne cite que le nom court : on compare donc sur ce nom.
+bool _citedIn(String project, String text) {
+  final short = project.split(RegExp(r'\s[-–:]\s')).first.trim();
+  if (short.length < 3) return false;
+  return text.toLowerCase().contains(short.toLowerCase());
 }

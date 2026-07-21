@@ -125,12 +125,18 @@ propose Gmail. L'accroche de la lettre est un placeholder marqué « à génére
 **Acceptation :** sur une offre réelle, la lettre passe les garde-fous (rien
 d'inventé, aucun tiret cadratin) et l'accroche cite un fait vérifiable sur
 l'entreprise.
-⏳ Partiellement vérifié sur appareil (Oppo, 20/07) : UI branchée, plafond
-affiché (« 0/5 »), dégradation propre sans clé (« Aucune clé pour DeepSeek »),
-sélecteur de fournisseur fonctionnel. **Le bout-en-bout avec un vrai appel LLM
-reste à faire** : il exige une clé DeepSeek/OpenRouter/Gemini (étape 0). Les
-garde-fous, le graphe, le grounding et le client sont couverts par 33 tests, et
-l'API INSEE a été confirmée en direct.
+✅ Vérifié de bout en bout sur appareil (Oppo, 21/07/2026), clé DeepSeek réelle,
+offre « Developpeur IA Junior chez Doctolib » (score local 82) : l'agent répond
+en ~20 s, score 85/100, recommandation « À postuler », compteur passé à 1/5.
+L'accroche cite « Doctolib révolutionne l'accès aux soins **depuis 2013** » —
+fait recoupé avec le registre (`date_creation: 2013-07-15`), donc vérifiable et
+non inventé. Aucun tiret cadratin. La lettre reprend l'accroche et le corps
+figé ; le CV ciblé est réordonné (Job Hunter en tête).
+**Défaut trouvé et corrigé à cette occasion** : l'accroche citait InfiniDex
+alors que la personnalisation le masquait du CV (elle est décidée au nœud
+`analyze`, avant que l'accroche existe). Le recruteur suivait une piste absente
+du document joint. Règle de cohérence ajoutée dans `sanitizePersonnalisation`
+(un projet cité dans l'accroche n'est jamais masqué), avec son test.
 
 ## Étape 5 : suivi
 

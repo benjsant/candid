@@ -14,11 +14,15 @@ Candid (`benjsant/candid`, `com.benjsant.candid`) : app Android autonome de
 candidature, compagnon du pipeline Docker `job_hunter` (pas un portage à
 parité). Contrat central : ne jamais broder, ne rien envoyer sans l'utilisateur.
 
-## État au 20/07/2026
+## État au 21/07/2026
 
-- **Étapes 1, 2, 3, 5 faites et validées sur appareil ; étape 4 (l'agent) codée
-  et testée, bout-en-bout en attente d'une clé LLM.** Oppo CPH2195, Android 13.
-  84 tests verts, `flutter analyze` propre.
+- **Étapes 1 à 5 faites et validées sur appareil réel.** Oppo CPH2195,
+  Android 13. 85 tests verts, `flutter analyze` propre. Reste l'étape 6
+  (collecte automatique), qui attend les clés France Travail et LBA.
+- **Étape 4 close le 21/07** : bout-en-bout avec une vraie clé DeepSeek sur une
+  offre Doctolib. Score agent 85/100, accroche ancrée sur un fait recoupable au
+  registre (création 2013), lettre et CV ciblé rendus. Voir TASKS pour le détail
+  et pour le défaut de cohérence lettre/CV corrigé à cette occasion.
 - **Étape 5 (suivi) close** : `ApplicationsRepository` (créer depuis une offre,
   statut/dates/notes/relance), onglet Suivi (`tracking_screen.dart`), bouton
   « Suivre » sur l'offre (l'offre quitte la boîte), export JSON via `share_plus`
@@ -113,6 +117,12 @@ un peu moins par appareil.
 
 ## Journal
 
+- **21/07/2026** : premier appel LLM réel (DeepSeek) depuis le téléphone. Étape
+  4 close. Enseignement : les deux nœuds qui écrivent (analyze pour le CV,
+  accroche pour la lettre) peuvent se contredire sans que rien ne soit inventé.
+  Ici l'accroche vantait un projet que le CV masquait. Les garde-fous
+  vérifiaient « rien d'inventé » mais pas « les deux documents se tiennent » :
+  règle de cohérence ajoutée. À garder en tête si d'autres nœuds s'ajoutent.
 - **20/07/2026 (soir)** : build à jour réinstallée sur l'Oppo, `dedupHash`
   vérifié en vrai (repartage même URL FT, titre retapé → doublon refusé), hash
   et index `idx_offers_*` confirmés depuis la base de l'appareil. Bloquant

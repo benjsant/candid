@@ -82,6 +82,21 @@ void main() {
       expect(s.hiddenProjects, hasLength(1));
     });
 
+    test('un projet cité dans l\'accroche n\'est jamais masqué', () {
+      // Cas réel (Doctolib, 21/07/2026) : l'accroche citait InfiniDex alors que
+      // la personnalisation le masquait du CV. Le recruteur suivait une piste
+      // absente du document joint.
+      const pc = PersonnalisationCv(
+        hiddenProjects: ['InfiniDex - Pokédex augmenté par IA', 'Audiomancy'],
+      );
+      final s = sanitizePersonnalisation(
+        pc,
+        cvIndexProjectsCount: 4,
+        accroche: 'des projets concrets comme Job Hunter ou InfiniDex.',
+      );
+      expect(s.hiddenProjects, ['Audiomancy']);
+    });
+
     test('index illisible (0) : seule la contradiction s\'applique', () {
       const pc = PersonnalisationCv(
         highlightSkills: ['Python'],

@@ -183,6 +183,7 @@ AgentOutput _validate(
       merged.personnalisationCv,
       cvIndexSkillsCount: skillsCount,
       cvIndexProjectsCount: projectsCount,
+      accroche: cleanLettre.accroche,
     ),
   );
 }
