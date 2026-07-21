@@ -19,6 +19,8 @@ import 'data/applications_repository.dart';
 import 'data/database.dart';
 import 'data/export_service.dart';
 import 'data/offers_repository.dart';
+import 'sources/collect_service.dart';
+import 'sources/france_travail.dart';
 import 'sources/shared_text.dart';
 import 'ui/offers_screen.dart';
 import 'ui/receive_share_screen.dart';
@@ -29,14 +31,21 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final db = AppDatabase();
   final prefs = AppPrefs();
+  final secrets = Secrets();
+  final repository = OffersRepository(db);
   // Charge le thème choisi avant le premier rendu, pour éviter un flash.
   final themeMode = ValueNotifier<ThemeMode>(await prefs.themeMode());
   runApp(
     CandidApp(
-      repository: OffersRepository(db),
+      repository: repository,
       applications: ApplicationsRepository(db),
       export: ExportService(db),
-      secrets: Secrets(),
+      collect: CollectService(
+        db: db,
+        repository: repository,
+        franceTravail: FranceTravailClient(secrets: secrets),
+      ),
+      secrets: secrets,
       prefs: prefs,
       themeMode: themeMode,
     ),
@@ -49,6 +58,7 @@ class CandidApp extends StatelessWidget {
     required this.repository,
     required this.applications,
     required this.export,
+    required this.collect,
     required this.secrets,
     required this.prefs,
     required this.themeMode,
@@ -57,6 +67,7 @@ class CandidApp extends StatelessWidget {
   final OffersRepository repository;
   final ApplicationsRepository applications;
   final ExportService export;
+  final CollectService collect;
   final Secrets secrets;
   final AppPrefs prefs;
   final ValueNotifier<ThemeMode> themeMode;
@@ -84,6 +95,7 @@ class CandidApp extends StatelessWidget {
           repository: repository,
           applications: applications,
           export: export,
+          collect: collect,
           secrets: secrets,
           prefs: prefs,
           themeMode: themeMode,
@@ -99,6 +111,7 @@ class HomeScreen extends StatefulWidget {
     required this.repository,
     required this.applications,
     required this.export,
+    required this.collect,
     required this.secrets,
     required this.prefs,
     required this.themeMode,
@@ -107,6 +120,7 @@ class HomeScreen extends StatefulWidget {
   final OffersRepository repository;
   final ApplicationsRepository applications;
   final ExportService export;
+  final CollectService collect;
   final Secrets secrets;
   final AppPrefs prefs;
   final ValueNotifier<ThemeMode> themeMode;
@@ -175,6 +189,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  bool _collecting = false;
+
+  Future<void> _collect() async {
+    if (_collecting) return;
+    setState(() => _collecting = true);
+    try {
+      final report = await widget.collect.collect();
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(report.summary)));
+      }
+    } finally {
+      // Le bouton doit toujours se réarmer, même si une source a échoué de
+      // façon inattendue : sinon la collecte reste bloquée jusqu'au relancement.
+      if (mounted) setState(() => _collecting = false);
+    }
+  }
+
   Future<void> _export() async {
     try {
       await widget.export.shareExport();
@@ -192,6 +224,26 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(['Offres', 'Suivi', 'Réglages'][_tab]),
         actions: [
+          // Collecte manuelle sur l'onglet Offres. Elle reste déclenchée à la
+          // main : la version périodique (workmanager) vient ensuite, et n'est
+          // de toute façon pas fiable sur toutes les surcouches constructeur.
+          if (_tab == 0)
+            _collecting
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  )
+                : IconButton(
+                    icon: const Icon(Icons.cloud_download_outlined),
+                    tooltip: 'Collecter les offres',
+                    onPressed: _collect,
+                  ),
           // Export sur l'onglet Suivi : sauvegarder offres + candidatures.
           if (_tab == 1)
             IconButton(
