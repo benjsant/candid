@@ -23,6 +23,10 @@ Compagnon mobile du projet Docker
 parité** : le mobile a moins de sources, et compense par la cible de partage
 Android que la version Docker ne peut pas avoir.
 
+📖 **[Documentation technique complète](https://benjsant.github.io/candid/)** —
+architecture, modèle de données, agent, sources, audit de sécurité, couverture
+de tests et journal des décisions.
+
 ## Les trois règles qui ne se négocient pas
 
 L'application **assiste**, elle ne se substitue jamais. Elle ne doit **jamais** :
@@ -150,6 +154,7 @@ vérifier — y compris par un assistant, qui ne voit pas votre écran.
 | [TASKS.md](TASKS.md) | le plan de build, coché, avec les critères d'acceptation vérifiés |
 | [CONTEXTE.md](CONTEXTE.md) | la mémoire de session : décisions, pièges rencontrés, journal daté |
 | `reference/` | les originaux du projet Docker, pour porter sans changer de dépôt |
+| [`docs/`](https://benjsant.github.io/candid/) | la documentation technique publiée (GitHub Pages) |
 
 Les **pièges rencontrés en vrai** sont consignés dans TASKS et CONTEXTE, avec
 la date et la preuve. Quelques-uns valent d'être lus avant de toucher au code :

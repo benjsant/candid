@@ -1,0 +1,14 @@
+title: Candid
+description: >-
+  Documentation technique de Candid, l'assistant de candidature Android qui ne
+  brode jamais.
+theme: jekyll-theme-cayman
+lang: fr
+
+# Les fichiers du dépôt qui ne font pas partie du site.
+exclude:
+  - Gemfile
+  - Gemfile.lock
+
+# Liens affichés sous le titre sur chaque page (thème Cayman).
+show_downloads: false
