@@ -142,6 +142,10 @@ class _HomeScreenState extends State<HomeScreen> {
   int _tab = 0;
   StreamSubscription<List<SharedMediaFile>>? _shareSub;
 
+  /// Partagé avec la collecte : le jeton mis en cache profite aux deux.
+  late final FranceTravailClient _franceTravail =
+      FranceTravailClient(secrets: widget.secrets);
+
   // Construits UNE fois : avec un IndexedStack, chaque onglet garde son état
   // (l'écran Réglages ne relit pas le secure storage à chaque bascule).
   late final List<Widget> _pages = [
@@ -194,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => ReceiveShareScreen(
           shared: parseSharedText(text),
           repository: widget.repository,
+          franceTravail: _franceTravail,
         ),
       ),
     );

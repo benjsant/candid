@@ -164,12 +164,17 @@ partage (Drive, Gmail, fichiers).
 ## Étape 6 : collecte automatique
 
 - [ ] `lib/sources/france_travail.dart` : OAuth client_credentials, recherche
-- [ ] **Résolution d'URL partagée** : une URL `francetravail.fr` reçue par
-      partage porte l'identifiant de l'offre (ex. `.../detail/211FDFG`). Une fois
-      les identifiants FT en place ici, résoudre cet id via l'API pour remplir
-      titre/entreprise/description dans l'écran de réception, au lieu de laisser
-      l'utilisateur tout retaper (constat 20/07 : LinkedIn et FT ne partagent
-      qu'une URL nue). Voir PLAN « La cible de partage ».
+- [x] **Résolution d'URL partagée faite** : `franceTravailOfferId()` extrait
+      l'identifiant de l'URL (`.../detail/210RHTN`), `offerById()` interroge
+      `/offres/{id}`, et l'écran de réception pré-remplit titre, entreprise,
+      lieu, contrat et **description** (bien plus riche que le texte partagé,
+      qui n'est qu'une URL : c'est elle que lira l'agent). Ne remplace jamais ce
+      que le parseur a extrait ni ce que l'utilisateur a saisi. Identifiant
+      périmé ou offre retirée : `null`, saisie manuelle comme avant.
+      ⏳ **Vérification appareil à refaire** : le téléphone s'est verrouillé
+      avant le test du partage d'URL nue (22/07). Le reste est couvert par
+      les tests, et l'endpoint `/offres/{id}` a été confirmé en direct
+      (210RHTN → « Développeur Informatique (H/F) », SASU SLUSARSKI).
 - [x] `lib/sources/france_travail.dart` **fait** : OAuth client_credentials +
       `/offres/search`. URL du realm, scopes (`api_offresdemploiv2 o2dsoffre`) et
       paramètres repris du workflow n8n, qui les a vérifiés en production. Jeton

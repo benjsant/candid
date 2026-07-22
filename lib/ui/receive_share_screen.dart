@@ -8,6 +8,8 @@ library;
 import 'package:flutter/material.dart';
 
 import '../data/offers_repository.dart';
+import '../sources/france_travail.dart';
+import '../sources/normalize.dart';
 import '../sources/shared_text.dart';
 
 class ReceiveShareScreen extends StatefulWidget {
@@ -15,10 +17,15 @@ class ReceiveShareScreen extends StatefulWidget {
     super.key,
     required this.shared,
     required this.repository,
+    this.franceTravail,
   });
 
   final SharedOffer shared;
   final OffersRepository repository;
+
+  /// Facultatif : permet de résoudre une URL France Travail partagée en offre
+  /// complète. Absent (ou sans identifiants), l'écran fonctionne comme avant.
+  final FranceTravailClient? franceTravail;
 
   @override
   State<ReceiveShareScreen> createState() => _ReceiveShareScreenState();
@@ -30,6 +37,52 @@ class _ReceiveShareScreenState extends State<ReceiveShareScreen> {
       TextEditingController(text: widget.shared.company ?? '');
   late final _location = TextEditingController();
   bool _saving = false;
+
+  /// Résolution en cours auprès de France Travail.
+  bool _resolving = false;
+
+  /// Ce que l'API a rendu, s'il y a eu résolution. Fournit une description bien
+  /// plus riche que le texte partagé, qui n'est souvent qu'une URL.
+  NormalizedOffer? _resolved;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveIfPossible();
+  }
+
+  /// Les applications officielles ne partagent qu'une URL nue. Quand cette URL
+  /// est une offre France Travail et que les identifiants sont là, on remplit
+  /// les champs au lieu de tout faire retaper.
+  ///
+  /// Silencieux en cas d'échec : c'est un confort, pas une étape obligatoire.
+  Future<void> _resolveIfPossible() async {
+    final client = widget.franceTravail;
+    final id = franceTravailOfferId(widget.shared.url);
+    if (client == null || id == null) return;
+    if (!await client.isConfigured) return;
+
+    if (mounted) setState(() => _resolving = true);
+    NormalizedOffer? offer;
+    try {
+      offer = await client.offerById(id);
+    } on FranceTravailUnavailable {
+      offer = null;
+    }
+    if (!mounted) return;
+
+    setState(() {
+      _resolving = false;
+      _resolved = offer;
+      if (offer != null) {
+        // On ne remplace jamais ce que le parseur avait correctement extrait,
+        // ni ce que l'utilisateur a déjà saisi.
+        if (_title.text.trim().isEmpty) _title.text = offer.title;
+        if (_company.text.trim().isEmpty) _company.text = offer.company;
+        if (_location.text.trim().isEmpty) _location.text = offer.location;
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -54,7 +107,14 @@ class _ReceiveShareScreenState extends State<ReceiveShareScreen> {
       title: title,
       company: _company.text.trim().isEmpty ? null : _company.text.trim(),
       location: _location.text.trim().isEmpty ? null : _location.text.trim(),
-      description: widget.shared.rawText,
+      // La description résolue vaut infiniment mieux que le texte partagé,
+      // qui n'est souvent qu'une URL. C'est elle que lira l'agent.
+      description: (_resolved?.description.isNotEmpty ?? false)
+          ? _resolved!.description
+          : widget.shared.rawText,
+      contractType: _resolved?.contractType,
+      salary: _resolved?.salary,
+      sourceId: _resolved?.sourceId,
       url: widget.shared.url,
     );
     if (!mounted) return;
@@ -78,7 +138,29 @@ class _ReceiveShareScreenState extends State<ReceiveShareScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (shared.needsReview)
+          if (_resolving)
+            const Card(
+              child: ListTile(
+                leading: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                title: Text('Récupération de l\'offre chez France Travail…'),
+              ),
+            )
+          else if (_resolved != null)
+            Card(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              child: const Padding(
+                padding: EdgeInsets.all(12),
+                child: Text(
+                  'Offre récupérée chez France Travail. Les champs viennent de '
+                  'l\'annonce officielle : vérifiez, puis enregistrez.',
+                ),
+              ),
+            )
+          else if (shared.needsReview)
             Card(
               color: Theme.of(context).colorScheme.secondaryContainer,
               child: const Padding(

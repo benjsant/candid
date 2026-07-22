@@ -58,6 +58,91 @@ void main() {
     );
   }
 
+  group('franceTravailOfferId', () {
+    test('extrait l\'identifiant des URL réellement partagées', () {
+      // Formes relevées en base après une collecte réelle (21/07/2026).
+      expect(
+        franceTravailOfferId(
+            'https://candidat.francetravail.fr/offres/recherche/detail/210RHTN'),
+        '210RHTN',
+      );
+      expect(
+        franceTravailOfferId(
+            'https://candidat.francetravail.fr/offres/recherche/detail/3964931'),
+        '3964931',
+      );
+      expect(
+        franceTravailOfferId(
+            'https://candidat.pole-emploi.fr/offres/recherche/detail/191KTPX'),
+        '191KTPX',
+      );
+    });
+
+    test('une URL d\'une autre source n\'est pas résolue', () {
+      expect(franceTravailOfferId('https://www.linkedin.com/jobs/view/123456'),
+          isNull);
+      expect(
+        franceTravailOfferId(
+            'https://www.welcometothejungle.com/fr/companies/x/jobs/detail/abcdef'),
+        isNull,
+        reason: 'le seul motif /detail/ ne suffit pas',
+      );
+    });
+
+    test('rien à extraire : null, on ne devine pas', () {
+      expect(franceTravailOfferId(null), isNull);
+      expect(franceTravailOfferId(''), isNull);
+      expect(franceTravailOfferId('https://candidat.francetravail.fr/offres/'),
+          isNull);
+      expect(
+        franceTravailOfferId('https://candidat.francetravail.fr/detail/AB'),
+        isNull,
+        reason: 'trop court pour être un identifiant d\'offre',
+      );
+    });
+  });
+
+  group('offerById', () {
+    test('résout une offre complète', () async {
+      final transport = _FakeTransport((o) => o.path.contains('access_token')
+          ? (200, {'access_token': 'j', 'expires_in': 1499})
+          : (
+              200,
+              {
+                'id': '210RHTN',
+                'intitule': 'Développeur Informatique (H/F)',
+                'entreprise': {'nom': 'SASU SLUSARSKI'},
+                'lieuTravail': {'libelle': '59 - ESCAUDAIN'},
+                'typeContrat': 'CDD',
+                'description': 'SOMEX, acteur reconnu…',
+              }
+            ));
+      final client =
+          FranceTravailClient(secrets: Secrets(), dio: _dioWith(transport));
+
+      final offer = await client.offerById('210RHTN');
+
+      expect(offer, isNotNull);
+      expect(offer!.title, 'Développeur Informatique (H/F)');
+      expect(offer.company, 'SASU SLUSARSKI');
+      expect(offer.location, '59 - ESCAUDAIN');
+      expect(offer.contractType, 'CDD');
+      expect(offer.description, 'SOMEX, acteur reconnu…');
+    });
+
+    test('identifiant inconnu (400) : null, pas d\'exception', () async {
+      // L'offre a pu être retirée. L'utilisateur complétera à la main : ce
+      // n'est pas une raison d'interrompre le partage.
+      final transport = _FakeTransport((o) => o.path.contains('access_token')
+          ? (200, {'access_token': 'j', 'expires_in': 1499})
+          : (400, null));
+      final client =
+          FranceTravailClient(secrets: Secrets(), dio: _dioWith(transport));
+
+      expect(await client.offerById('INEXISTANT'), isNull);
+    });
+  });
+
   test('recherche nominale : jeton puis offres normalisées', () async {
     final transport = _FakeTransport(nominal);
     final client =

@@ -31,8 +31,9 @@ class FranceTravailUnavailable implements Exception {
 
 const _tokenUrl =
     'https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=/partenaire';
-const _searchUrl =
-    'https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search';
+const _offresUrl =
+    'https://api.francetravail.io/partenaire/offresdemploi/v2/offres';
+const _searchUrl = '$_offresUrl/search';
 
 /// Scopes exigés par l'API Offres d'emploi v2 (repris du workflow Docker).
 const _scope = 'api_offresdemploiv2 o2dsoffre';
@@ -43,6 +44,29 @@ const _expiryMarginSeconds = 60;
 
 /// Durée de repli si l'API n'annonce pas d'`expires_in` (valeur du workflow).
 const _fallbackExpiresIn = 1499;
+
+/// Extrait l'identifiant d'offre d'une URL France Travail partagée.
+///
+/// Les applications officielles ne partagent qu'une URL nue (constat appareil du
+/// 20/07/2026) : ni titre, ni entreprise. Mais cette URL porte l'identifiant,
+/// « .../offres/recherche/detail/210RHTN », et l'API sait le résoudre. C'est la
+/// vraie réponse à la friction, plutôt que de faire retaper l'offre.
+///
+/// Rend `null` si l'URL n'est pas une offre France Travail : on ne devine pas.
+String? franceTravailOfferId(String? url) {
+  if (url == null || url.isEmpty) return null;
+  final lower = url.toLowerCase();
+  if (!lower.contains('francetravail.') && !lower.contains('pole-emploi.')) {
+    return null;
+  }
+
+  // Le dernier segment de chemin, débarrassé d'une éventuelle query string.
+  final match = RegExp(r'/detail/([A-Za-z0-9]+)').firstMatch(url);
+  final id = match?.group(1);
+  // Les identifiants observés font 6 à 8 caractères alphanumériques
+  // (« 210RHTN », « 3964931 »). Plus court, c'est autre chose qu'une offre.
+  return (id != null && id.length >= 5) ? id : null;
+}
 
 class FranceTravailClient {
   FranceTravailClient({required Secrets secrets, Dio? dio})
@@ -122,6 +146,41 @@ class FranceTravailClient {
     _token = token;
     _tokenExpiry = DateTime.now().add(Duration(seconds: seconds.clamp(0, 86400)));
     return token;
+  }
+
+  /// Récupère une offre par son identifiant, pour remplir l'écran de réception
+  /// quand un partage n'apporte qu'une URL.
+  ///
+  /// Rend `null` si l'offre est introuvable (identifiant périmé, offre retirée) :
+  /// l'utilisateur complète alors à la main, comme avant. Ce n'est pas une
+  /// erreur qui mérite d'interrompre le partage.
+  Future<NormalizedOffer?> offerById(String id) async {
+    final token = await _accessToken();
+
+    final Response<dynamic> response;
+    try {
+      response = await _dio.get<dynamic>(
+        '$_offresUrl/$id',
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+          validateStatus: (_) => true,
+        ),
+      );
+    } on DioException catch (e) {
+      throw FranceTravailUnavailable(
+        'France Travail injoignable (${e.type.name}).',
+      );
+    }
+
+    if (response.statusCode != 200) return null;
+    final body = response.data;
+    if (body is! Map) return null;
+
+    // L'endpoint unitaire rend l'offre seule, pas une liste : on la réemballe
+    // pour réutiliser le normaliseur, source de vérité du mapping.
+    return normalizeFranceTravail({
+      'resultats': [body.cast<String, dynamic>()],
+    }).firstOrNull;
   }
 
   /// Recherche des offres. Les paramètres reprennent ceux du workflow Docker :
