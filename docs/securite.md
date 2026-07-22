@@ -71,7 +71,7 @@ Mesuré, pas supposé :
 
 C'est raisonnable, mais ce n'est pas rien : **le nom et le parcours transitent
 chez un tiers**. Le choix du fournisseur est donc un choix de confidentialité,
-et l'écran de réglages le dit — notamment pour Gemini, dont l'offre gratuite
+et l'écran de réglages le dit, notamment pour Gemini, dont l'offre gratuite
 entraîne sur les requêtes.
 
 ### Vers les API publiques
@@ -121,7 +121,7 @@ contient aucun secret.
 ## Correctifs apportés par l'audit
 
 **Export temporaire persistant.** L'export contient tout l'historique de
-candidatures et restait indéfiniment dans le cache — un export du 20/07 y dormait
+candidatures et restait indéfiniment dans le cache : un export du 20/07 y dormait
 encore. Il est désormais effacé après le partage, avec les exports d'anciennes
 versions. Le nettoyage est en `finally` et ne fait jamais échouer un export
 réussi.
@@ -135,7 +135,7 @@ signingConfig = signingConfigs.getByName("debug")
 ```
 
 Sans conséquence pour un usage personnel. **Bloquant pour toute distribution** :
-n'importe qui pourrait signer une mise à jour. Il faut créer un keystore — ce
+n'importe qui pourrait signer une mise à jour. Il faut créer un keystore, ce
 qui suppose un mot de passe que seul l'utilisateur doit choisir.
 
 ### L'application installée est un build debug
@@ -152,7 +152,7 @@ flutter build apk --release --split-per-abi   # ~22 Mo arm64
 Un seul composant exporté : l'activité principale, cible de partage. Elle
 n'accepte que du `text/plain`, qui est **analysé puis présenté à l'utilisateur
 avant tout enregistrement**. Une application malveillante ne peut donc, au pire,
-que proposer une fausse offre — que l'utilisateur voit et refuse.
+que proposer une fausse offre, que l'utilisateur voit et refuse.
 
 Aucun `Service`, `Receiver` ni `Provider` exporté.
 

@@ -22,11 +22,11 @@ qu'elle contient ont été mesurés, pas estimés ; les pièges qu'elle signale 
 Ce n'est pas une accroche marketing, c'est une contrainte d'ingénierie. Trois
 règles ne se négocient jamais :
 
-1. **Ne rien inventer** — aucune compétence, expérience, certification ou
+1. **Ne rien inventer** : aucune compétence, expérience, certification ou
    mission qui ne figure pas déjà dans le CV maître.
-2. **Ne rien envoyer** — l'application produit des PDF et s'arrête là.
+2. **Ne rien envoyer** : l'application produit des PDF et s'arrête là.
    L'utilisateur relit, puis envoie lui-même depuis sa messagerie.
-3. **Ne rien modifier sans validation** — les données personnelles restent
+3. **Ne rien modifier sans validation** : les données personnelles restent
    sous contrôle de l'utilisateur.
 
 Ces règles sont tenues par **du code testé**, pas par de la discipline : voir

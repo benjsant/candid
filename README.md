@@ -19,11 +19,11 @@ Accessoirement, l'application collecte aussi toute seule (France Travail, La
 Bonne Alternance) et notifie.
 
 Compagnon mobile du projet Docker
-[job_hunter](https://github.com/benjsant/job_hunter) — **pas un portage à
+[job_hunter](https://github.com/benjsant/job_hunter), et **pas un portage à
 parité** : le mobile a moins de sources, et compense par la cible de partage
 Android que la version Docker ne peut pas avoir.
 
-📖 **[Documentation technique complète](https://benjsant.github.io/candid/)** —
+📖 **[Documentation technique complète](https://benjsant.github.io/candid/)** :
 architecture, modèle de données, agent, sources, audit de sécurité, couverture
 de tests et journal des décisions.
 
@@ -126,7 +126,7 @@ flutter build apk --release --split-per-abi   # ~22 Mo pour arm64
 
 Le build **debug** pèse ~180 Mo (kernel JIT, moteurs non strippés) : ce n'est
 pas un problème à corriger. En revanche il est `debuggable`, donc `adb run-as`
-peut lire les données de l'application — préférez un build release dès que vous
+peut lire les données de l'application. Préférez un build release dès que vous
 utilisez Candid pour de vrai.
 
 > ⚠️ Le build release est actuellement signé avec la **clé de debug**. Sans
@@ -143,7 +143,7 @@ adb exec-out screencap -p > /tmp/capture.png
 ```
 
 `scrcpy` sert à l'humain (miroir de l'écran) ; les captures `adb` servent à
-vérifier — y compris par un assistant, qui ne voit pas votre écran.
+vérifier, y compris par un assistant, qui ne voit pas votre écran.
 
 ## Où lire quoi
 

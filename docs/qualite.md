@@ -11,7 +11,7 @@ Mesures du **22 juillet 2026**, obtenues par `flutter test --coverage`,
 
 ## Couverture réelle
 
-Code généré par `drift` exclu — il n'est pas écrit à la main et le compter
+Code généré par `drift` exclu, car il n'est pas écrit à la main et le compter
 gonflerait artificiellement le dénominateur.
 
 | Couche | Lignes couvertes | Taux |
@@ -39,7 +39,7 @@ Les huit écrans n'ont **aucun test de widget**. C'est un choix, pas un oubli :
 - ils sont **vérifiés sur un appareil réel**, capture à l'appui, à chaque étape
   du plan de construction ;
 - un test de widget vérifie qu'un bouton existe, pas que le partage depuis
-  LinkedIn fonctionne — or c'est cela qui compte ici.
+  LinkedIn fonctionne, or c'est cela qui compte ici.
 
 C'est une dette assumée. Elle deviendrait coûteuse si l'interface se
 complexifiait.
@@ -51,7 +51,7 @@ complexifiait.
 pas en test unitaire.
 
 La partie *logique* de ces modules est extraite en fonctions pures et testée à
-part — `collectNotification()` et `digestNotification()` en sont l'exemple :
+part. `collectNotification()` et `digestNotification()` en sont l'exemple :
 **16 tests** portent sur le texte des notifications, sans jamais toucher au
 plugin.
 
@@ -133,8 +133,8 @@ façon confuse : l'erreur pointe rarement le vrai coupable.
 > l'émulateur.
 
 Cette règle a payé plusieurs fois. Les quatre pièges les plus coûteux du projet
-— le ET de `motsCles`, le `200 []` de `geo.api.gouv.fr`, l'URL nue des partages,
-le gel des processus par ColorOS — étaient **tous invisibles en test unitaire**.
+(le ET de `motsCles`, le `200 []` de `geo.api.gouv.fr`, l'URL nue des partages,
+le gel des processus par ColorOS) étaient **tous invisibles en test unitaire**.
 Les simulacres répondaient sagement ce qu'on leur avait dit de répondre.
 
 [← Sécurité](securite.html) · [Décisions →](decisions.html)

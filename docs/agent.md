@@ -38,8 +38,8 @@ décidé par des règles l'est par des règles**, parce qu'une règle ne dérive
 
 ## Le grounding : des faits, pas des souvenirs
 
-`research` interroge `recherche-entreprises.api.gouv.fr` — le registre officiel,
-**sans clé** — et rend des faits bruts : date de création, activité, effectifs,
+`research` interroge `recherche-entreprises.api.gouv.fr`, le registre officiel,
+**sans clé**, et rend des faits bruts : date de création, activité, effectifs,
 commune du siège.
 
 Si l'API ne répond pas, le champ reste vide et l'accroche s'écrit sans. Elle
@@ -70,7 +70,7 @@ tours, avec les problèmes renvoyés au modèle.
 ### `sanitizePersonnalisation`
 
 Le plus important. Le modèle choisit quoi mettre en avant et quoi masquer dans
-le CV — mais il ne choisit **que parmi ce qui existe déjà** :
+le CV, mais il ne choisit **que parmi ce qui existe déjà** :
 
 - rien qui soit à la fois mis en avant et masqué ;
 - au plus un tiers des compétences masquées ;
@@ -80,8 +80,8 @@ le CV — mais il ne choisit **que parmi ce qui existe déjà** :
 Cette dernière règle vient d'un défaut trouvé en conditions réelles.
 
 > **Le 21/07/2026**, la lettre générée vantait le projet *InfiniDex*… que la
-> personnalisation avait masqué du CV joint. Rien n'était inventé — le projet
-> existe bien — mais le recruteur suivait une piste absente du document.
+> personnalisation avait masqué du CV joint. Rien n'était inventé (le projet
+> existe bien), mais le recruteur suivait une piste absente du document.
 >
 > La cause est structurelle : la personnalisation est décidée au nœud `analyze`,
 > **avant** que l'accroche existe. Les garde-fous vérifiaient « rien d'inventé »,
@@ -104,12 +104,12 @@ Trois fournisseurs derrière une seule interface, tous compatibles OpenAI :
 
 | Fournisseur | Position | Réserve |
 |---|---|---|
-| **DeepSeek** | par défaut | — |
+| **DeepSeek** | par défaut | aucune |
 | **OpenRouter** | alternative | mode gratuit, entraînement désactivable |
 | **Gemini** | optionnel | **son offre gratuite entraîne sur les requêtes** : à réserver au non sensible |
 
 Le modèle est configurable, jamais codé en dur. **Sans clé, l'agent se désactive
-proprement** avec un message clair — l'application ne plante pas, elle se réduit
+proprement** avec un message clair : l'application ne plante pas, elle se réduit
 à une liste d'offres.
 
 > Anthropic n'est pas un fournisseur : l'abonnement Pro ne donne pas d'accès API.

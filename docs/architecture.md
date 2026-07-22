@@ -42,7 +42,7 @@ Le code généré par `drift` (6 506 lignes) n'est pas compté : il n'est pas é
              domain/          (aucune dépendance sortante)
 ```
 
-**`domain/` ne dépend de rien** — pas même de Flutter. C'est ce qui rend le
+**`domain/` ne dépend de rien**, pas même de Flutter. C'est ce qui rend le
 scoring, le hash et le rapprochement testables en quelques millisecondes, sans
 émulateur ni base. Cette pureté est vérifiée : aucun `import 'package:flutter/'`
 n'y figure.

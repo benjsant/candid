@@ -9,7 +9,7 @@ title: Les sources
 Quatre voies d'entrée, et un principe commun : **un champ absent reste vide**.
 Jamais deviné, jamais comblé.
 
-## 1. Le partage Android — la voie principale
+## 1. Le partage Android, la voie principale
 
 L'application est déclarée cible `ACTION_SEND` / `text/plain`. Depuis LinkedIn,
 France Travail ou un navigateur, « Partager » puis « Candid ».
@@ -26,7 +26,7 @@ C'est la force propre du mobile : la version Docker ne peut pas l'avoir.
 > partages manuels, mais ne pas les « améliorer » sans capture réelle.
 
 Découverte annexe : le navigateur envoie bien le titre de la page, mais dans
-`EXTRA_SUBJECT` — que le plugin `receive_sharing_intent` ne remonte pas. Piste
+`EXTRA_SUBJECT`, que le plugin `receive_sharing_intent` ne remonte pas. Piste
 notée, non implémentée.
 
 ### La réponse : résoudre l'URL
@@ -61,7 +61,7 @@ en plus.
 >
 > | Requête | Résultat |
 > |---|---|
-> | `développeur python intelligence artificielle` | **HTTP 204** — zéro |
+> | `développeur python intelligence artificielle` | **HTTP 204**, zéro |
 > | `développeur,python` | 5 offres |
 > | `python` | 7 offres |
 >
@@ -80,7 +80,7 @@ filtre de scoring `isOutOfZone` n'écarte que l'étranger, pas les villes
 françaises lointaines.
 
 > Résultat mesuré : **150 offres, dont Toulouse, Lyon et Montpellier notées 92**
-> — mieux que les offres locales. D'où l'écran de profil de recherche, et son
+> soit mieux que les offres locales. D'où l'écran de profil de recherche, et son
 > avertissement tant qu'aucune commune n'est retenue.
 
 Après correction : Valenciennes + Lille + Douai, 30 km → **114 offres, aucune
@@ -121,7 +121,7 @@ résolu.
 
 > **Piège rencontré.** Le paramètre `code` **n'accepte pas de liste** :
 > `code=59606,59350` répond **`200 []`**, sans erreur. Avoir supposé le contraire
-> désactivait silencieusement toute la source LBA — le seul indice était le
+> désactivait silencieusement toute la source LBA. Le seul indice était le
 > message « aucune commune localisable ».
 >
 > Une API qui répond 200 avec un corps vide est plus dangereuse qu'une qui
@@ -148,12 +148,12 @@ erreur est asymétrique : mieux vaut afficher deux fois que masquer une fois.
 
 La règle exige donc **simultanément** :
 
-1. des **sources différentes** — deux annonces d'une même source sont deux
+1. des **sources différentes**, car deux annonces d'une même source sont deux
    offres, même homonymes (quatre « Développeur web » à Lille, agences
    différentes) ;
 2. le **même titre** canonicalisé ;
-3. la **même ville** — `« 59 - Roubaix »` et `« 59100 Roubaix »` se rejoignent ;
-4. des **entreprises compatibles** — identiques, ou l'une non renseignée.
+3. la **même ville** : `« 59 - Roubaix »` et `« 59100 Roubaix »` se rejoignent ;
+4. des **entreprises compatibles** : identiques, ou l'une non renseignée.
 
 > Passée sur les 125 offres réelles : **une seule paire rapprochée**, exactement
 > le doublon documenté. Vérifié sur appareil : version LBA supprimée, collecte

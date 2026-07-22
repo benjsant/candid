@@ -76,7 +76,7 @@ demandé. Et sur beaucoup d'appareils, ils ne partiront pas.
 > ```
 > Le processus est **gelé dix secondes après son réveil**. Par ailleurs,
 > « forcer l'arrêt » annule le travail planifié jusqu'à réouverture de
-> l'application — c'est le mécanisme exact des tueurs de tâches.
+> l'application. C'est le mécanisme exact des tueurs de tâches.
 
 **Conséquence.** Un bouton « Tester maintenant » a été ajouté : sur une
 fonctionnalité dont la fiabilité dépend du constructeur, l'utilisateur doit
@@ -105,7 +105,7 @@ aurait fusionnées et **aurait caché des offres auxquelles postuler**.
 **Le principe.** Le coût d'une erreur est asymétrique : afficher deux fois gêne,
 masquer une fois nuit. À incertitude égale, on montre.
 
-**Résultat.** La règle rapproche exactement une paire sur 125 offres — le
+**Résultat.** La règle rapproche exactement une paire sur 125 offres : le
 doublon documenté. Zéro dépendance, zéro mégaoctet, neuf tests.
 
 ---
@@ -131,7 +131,7 @@ poste à consulter ».
 **Décision.** La collecte France Travail envoie un appel par terme, puis fusionne.
 
 **Pourquoi.** `motsCles` fait un **ET**, limité à trois mots. Quatre mots
-renvoyaient `HTTP 204` — zéro résultat — là où « python » seul en donnait sept.
+renvoyaient `HTTP 204`, soit zéro résultat, là où « python » seul en donnait sept.
 
 **Affinement.** Sans virgule dans la saisie, on sépare sur les espaces : celui
 qui tape « développeur python ia » attend trois recherches, pas une offre

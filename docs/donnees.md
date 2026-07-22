@@ -44,7 +44,7 @@ contact du réel.
 
 Une contrainte `UNIQUE` sur `offers.hash`, alimentée par `dedupHash()` :
 
-- **si l'offre a une URL** : `sha256('url:' + urlCanonique)` — l'URL est
+- **si l'offre a une URL** : `sha256('url:' + urlCanonique)`, car l'URL est
   l'identité la plus stable d'une annonce ;
 - **sinon** : `sha256(titre + entreprise + lieu)`, canonicalisés (minuscules,
   accents repliés, « (H/F) » retiré).
@@ -71,7 +71,7 @@ Le cas qui échappe au hash : La Bonne Alternance **rediffuse** les offres
 France Travail, sans le nom de l'employeur. Deux hash différents pour une seule
 offre.
 
-La règle est volontairement étroite — voir [Sources](sources.html#rapprochement-inter-sources)
+La règle est volontairement étroite. Voir [Sources](sources.html#rapprochement-inter-sources)
 pour le raisonnement complet et les données qui l'ont dictée.
 
 ## Migrations
@@ -96,7 +96,7 @@ La v1 → v2 a été la première migration écrite avec des données réelles e
 La méthode qui a fonctionné, à reprendre :
 
 1. **Sauvegarder la base de l'appareil avant** (`adb exec-out run-as … cat`).
-2. **N'ajouter que des colonnes nullables** — aucune donnée existante n'est
+2. **N'ajouter que des colonnes nullables** : aucune donnée existante n'est
    touchée, aucune valeur par défaut à inventer.
 3. **Vérifier les comptes après** : 125 offres, 1 candidature, 1 profil,
    `user_version` passée à 2. Tous intacts.
