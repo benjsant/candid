@@ -167,6 +167,27 @@ void main() {
     expect(searches.first.queryParameters['motsCles'], 'un deux trois');
   });
 
+  test('les offres notables sont comptées, pour la notification', () async {
+    // « 12 nouvelles » ne dit rien ; « dont 3 au-dessus de 75 » fait ouvrir
+    // l'application. C'est ce compteur qui rend la notification utile.
+    final transport = _FakeTransport([
+      {
+        'id': '1',
+        'intitule': 'Développeur Python IA junior',
+        'entreprise': {'nom': 'A'},
+        'description':
+            'Python, machine learning, LLM, RAG, FastAPI, PostgreSQL, Docker. '
+                'Télétravail partiel. Poste junior, CDI.',
+      },
+      {'id': '2', 'intitule': 'Chauffeur livreur', 'entreprise': {'nom': 'B'}},
+    ]);
+
+    final report = await serviceWith(transport).collect();
+
+    expect(report.saved, 2);
+    expect(report.notable, 1, reason: 'seule la première dépasse le seuil');
+  });
+
   test('le résumé est lisible', () async {
     final transport = _FakeTransport([
       {'id': '1', 'intitule': 'Développeur IA', 'entreprise': {'nom': 'A'}},

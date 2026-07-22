@@ -12,7 +12,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:workmanager/workmanager.dart';
 
+import 'background/collect_task.dart';
 import 'core/app_prefs.dart';
 import 'core/secrets.dart';
 import 'data/applications_repository.dart';
@@ -37,6 +39,17 @@ Future<void> main() async {
   final repository = OffersRepository(db);
   // Charge le thème choisi avant le premier rendu, pour éviter un flash.
   final themeMode = ValueNotifier<ThemeMode>(await prefs.themeMode());
+
+  // L'isolat de fond doit être déclaré au démarrage, même si aucune tâche n'est
+  // planifiée : sans ça, activer la collecte depuis les réglages ne suffirait
+  // pas. Une erreur ici (émulateur, appareil bridé) ne doit pas empêcher
+  // l'application de démarrer.
+  try {
+    await Workmanager().initialize(callbackDispatcher);
+    await syncDailyCollect(await prefs.dailyCollect());
+  } catch (_) {
+    // La collecte manuelle reste disponible : on n'insiste pas.
+  }
   runApp(
     CandidApp(
       repository: repository,

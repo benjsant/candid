@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android 13+ exige une permission explicite pour notifier. Refusée, la
+         collecte tourne quand même : elle est simplement muette. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- allowBackup="false" : l'application détient des secrets (clés LLM,
          identifiants France Travail) dans le Keystore, et tout l'historique de
          candidatures. Android sauvegarde par défaut les shared_prefs, ce qui

@@ -28,4 +28,16 @@ class AppPrefs {
 
   Future<void> setThemeMode(ThemeMode mode) =>
       _storage.write(key: _kTheme, value: mode.name);
+
+  static const _kDailyCollect = 'daily_collect';
+
+  /// Collecte quotidienne en arrière-plan. **Désactivée par défaut** : elle
+  /// consomme de la batterie et du réseau sans que l'utilisateur l'ait demandé,
+  /// et sur beaucoup d'appareils elle ne partira pas de toute façon. C'est un
+  /// choix explicite, pas un réglage qu'on impose.
+  Future<bool> dailyCollect() async =>
+      (await _storage.read(key: _kDailyCollect)) == 'true';
+
+  Future<void> setDailyCollect(bool enabled) =>
+      _storage.write(key: _kDailyCollect, value: enabled.toString());
 }

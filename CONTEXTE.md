@@ -123,6 +123,15 @@ un peu moins par appareil.
 
 ## Journal
 
+- **22/07/2026** : étape 6 close. Collecte de fond (`workmanager`) +
+  notifications vérifiées application fermée : « 19 nouvelles offres, 3
+  dépassent 75/100 ». Trois choses apprises. (1) `flutter_local_notifications`
+  exige le core library desugaring côté Gradle, sinon le build casse net.
+  (2) « Forcer l'arrêt » annule le job jusqu'à réouverture, et ColorOS gèle le
+  processus 10 s après l'avoir réveillé : le piège documenté dans PLAN est réel,
+  visible en clair dans logcat. (3) D'où le bouton « Tester maintenant » : sur
+  une fonctionnalité dont la fiabilité dépend du constructeur, l'utilisateur doit
+  pouvoir vérifier lui-même, sans attendre un lendemain incertain.
 - **21/07/2026 (nuit)** : La Bonne Alternance branchée et vérifiée (2 offres
   d'alternance, ~297 entreprises à démarcher signalées mais NON enregistrées :
   sans poste publié, en faire des offres serait inventer). Trois enseignements.

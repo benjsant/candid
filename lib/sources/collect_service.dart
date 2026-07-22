@@ -13,6 +13,7 @@ import 'package:drift/drift.dart' show OrderingMode, OrderingTerm;
 import '../data/database.dart';
 import '../data/offers_repository.dart';
 import '../domain/scoring.dart';
+import '../core/notifications.dart';
 import '../data/profile_repository.dart';
 import 'france_travail.dart';
 import 'geo.dart';
@@ -27,6 +28,7 @@ class CollectReport {
     this.duplicates = 0,
     this.excluded = 0,
     this.recruiters = 0,
+    this.notable = 0,
     this.errors = const [],
   });
 
@@ -40,6 +42,11 @@ class CollectReport {
   /// des offres (aucun poste publié), donc elles ne sont pas enregistrées comme
   /// telles. On les compte pour ne pas perdre l'information.
   final int recruiters;
+
+  /// Parmi les nouvelles, combien dépassent le seuil d'intérêt. C'est ce
+  /// chiffre qui rend une notification utile : « 12 nouvelles » ne dit rien,
+  /// « dont 3 au-dessus de 75 » fait ouvrir l'application.
+  final int notable;
 
   /// Sources en échec, avec leur message. Une source qui tombe n'annule pas
   /// les autres : on collecte ce qu'on peut et on le dit.
@@ -98,6 +105,7 @@ class CollectService {
           );
 
     var fetched = 0, saved = 0, duplicates = 0, excluded = 0, recruiters = 0;
+    var notable = 0;
     final errors = <String>[];
 
     // Toutes les offres des sources, dédoublonnées par identifiant avant même
@@ -177,6 +185,7 @@ class CollectService {
       switch (result.outcome) {
         case SaveOutcome.saved:
           saved++;
+          if ((result.score ?? 0) >= kNotableScore) notable++;
         case SaveOutcome.duplicate:
           duplicates++;
         case SaveOutcome.excluded:
@@ -190,6 +199,7 @@ class CollectService {
       duplicates: duplicates,
       excluded: excluded,
       recruiters: recruiters,
+      notable: notable,
       errors: errors,
     );
   }

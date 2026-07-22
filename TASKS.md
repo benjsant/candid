@@ -223,11 +223,35 @@ partage (Drive, Gmail, fichiers).
 - [ ] « Re-scorer » : recalculer les scores des offres en attente quand le
       profil de recherche change (les scores sont figés à l'insertion ; la
       logique est pure, c'est trois lignes)
-- [ ] `workmanager` : collecte une fois par jour
-- [ ] Notification locale : « 12 nouvelles offres, dont 3 au-dessus de 75 »
+- [x] `workmanager` **fait** : `lib/background/collect_task.dart`, isolat
+      séparé qui reconstruit base, coffre-fort et clients, puis **referme la
+      base** (sinon le fichier SQLite reste verrouillé pour l'application).
+      Désactivé par défaut : c'est un choix explicite de l'utilisateur.
+      Bouton « Tester maintenant » (tâche ponctuelle) pour vérifier sur SON
+      appareil, plutôt que d'attendre un lendemain qui ne viendra peut-être pas.
+      `flutter_local_notifications` impose d'activer le **core library
+      desugaring** dans `android/app/build.gradle.kts`.
+- [x] Notification locale **faite** : `lib/core/notifications.dart`. Un seul
+      message par collecte, avec un identifiant fixe (une nouvelle collecte
+      remplace l'ancienne au lieu d'empiler). `collectNotification()` est pure
+      et testée : **rien à dire = pas de notification** (un « 0 nouvelle offre »
+      quotidien ferait désinstaller l'application), mais une panne persistante
+      est signalée, sinon l'utilisateur croit que ça tourne.
 
 **Acceptation :** un second appui sur « Collecter » n'ajoute aucun doublon, et la
 notification arrive sans ouvrir l'application.
+✅ **Vérifié sur appareil (Oppo ColorOS, 22/07/2026).** Collecte de fond
+déclenchée application fermée, écran d'accueil : notification reçue,
+« **19 nouvelles offres — 3 dépassent 75/100** ». Base intacte après coup :
+125 offres, zéro doublon de hash, l'isolat a bien refermé le fichier.
+
+Deux constats sur le comportement d'Android, relevés dans les logs :
+- **« Forcer l'arrêt » annule le job planifié**, définitivement, jusqu'à la
+  réouverture de l'application. C'est le mécanisme exact des tueurs de tâches.
+- ColorOS **gèle le processus** dix secondes après l'avoir réveillé
+  (`OplusHansManager: freeze uid ... com.benjsant.candid`). La tâche périodique
+  n'est donc jamais garantie sur cet appareil, quoi qu'on code.
+Le bouton de collecte manuelle reste la voie fiable, et l'écran le dit.
 
 > Piège connu : Xiaomi, Samsung et Huawei tuent les tâches de fond. Si la collecte
 > ne part pas, c'est probablement l'optimisation de batterie du constructeur, pas

@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 
 import '../agent/agent_config.dart';
 import '../agent/llm.dart';
+import '../../background/collect_task.dart';
 import '../core/app_prefs.dart';
+import '../core/notifications.dart';
 import '../core/secrets.dart';
 import '../data/database.dart';
 import '../data/profile_repository.dart';
@@ -49,6 +51,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
   LlmProvider _provider = LlmProvider.deepseek;
   bool _loading = true;
 
+  /// Collecte quotidienne en arrière-plan.
+  bool _dailyCollect = false;
+
+  /// Permission de notifier (Android 13+). Sans elle, la collecte tournerait
+  /// mais resterait muette : autant le dire plutôt que de laisser croire.
+  bool _notificationsAllowed = true;
+
+  final _notifications = Notifications();
+
+  Future<void> _setDailyCollect(bool enabled) async {
+    if (enabled) {
+      // On demande la permission au moment où elle sert, pas au lancement.
+      await _notifications.init();
+      if (!await _notifications.isAllowed) {
+        await _notifications.requestPermission();
+      }
+    }
+    await widget.prefs.setDailyCollect(enabled);
+    await syncDailyCollect(enabled);
+    if (!mounted) return;
+    setState(() => _dailyCollect = enabled);
+    _notificationsAllowed = await _notifications.isAllowed;
+    if (mounted) setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +88,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
     _provider = await _agentConfig.provider();
     _modelController.text = await _agentConfig.model();
+    _dailyCollect = await widget.prefs.dailyCollect();
+    await _notifications.init();
+    _notificationsAllowed = await _notifications.isAllowed;
     if (mounted) setState(() => _loading = false);
   }
 
@@ -166,6 +196,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             );
           },
+        ),
+        const SizedBox(height: 8),
+        Card(
+          margin: EdgeInsets.zero,
+          child: Column(
+            children: [
+              SwitchListTile(
+                secondary: const Icon(Icons.schedule),
+                title: const Text('Collecte quotidienne'),
+                subtitle: Text(
+                  _dailyCollect
+                      ? 'Une fois par jour, en arrière-plan, avec une '
+                          'notification s\'il y a du nouveau.'
+                      : 'Désactivée. Le bouton de l\'onglet Offres reste '
+                          'disponible à tout moment.',
+                ),
+                value: _dailyCollect,
+                onChanged: _setDailyCollect,
+              ),
+              if (_dailyCollect && !_notificationsAllowed)
+                ListTile(
+                  leading: Icon(Icons.notifications_off_outlined,
+                      color: Theme.of(context).colorScheme.error),
+                  title: const Text('Notifications refusées'),
+                  subtitle: const Text(
+                    'La collecte tournera, mais sans vous prévenir. '
+                    'Autorisez-les dans les réglages Android.',
+                  ),
+                ),
+              if (_dailyCollect)
+                ListTile(
+                  leading: const Icon(Icons.play_circle_outline),
+                  title: const Text('Tester maintenant'),
+                  subtitle: const Text(
+                    'Lance une collecte en arrière-plan tout de suite, pour '
+                    'voir si votre téléphone la laisse passer.',
+                  ),
+                  onTap: () async {
+                    await runCollectOnceInBackground();
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Collecte de fond demandée. La notification arrive '
+                          'd\'ici une minute si tout va bien.',
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              if (_dailyCollect)
+                const ListTile(
+                  leading: Icon(Icons.info_outline),
+                  title: Text('Selon votre téléphone, ça peut ne pas partir'),
+                  subtitle: Text(
+                    'Beaucoup de constructeurs (Oppo, Xiaomi, Samsung) tuent '
+                    'les tâches de fond. Si rien n\'arrive, retirez Candid des '
+                    'optimisations de batterie, ou collectez à la main.',
+                  ),
+                ),
+            ],
+          ),
         ),
         const Divider(height: 32),
 

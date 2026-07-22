@@ -13,6 +13,10 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // Exigé par flutter_local_notifications : il utilise des API de date
+        // du JDK que minSdk 24 n'a pas. Le desugaring les fournit à la
+        // compilation, sans relever minSdk (ce qui exclurait des appareils).
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -35,6 +39,10 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }
 
 kotlin {
