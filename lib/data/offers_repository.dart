@@ -3,6 +3,7 @@ library;
 
 import 'package:drift/drift.dart';
 
+import '../domain/dedup.dart';
 import '../domain/hash.dart';
 import '../domain/scoring.dart';
 import 'database.dart';
@@ -32,6 +33,40 @@ class OffersRepository {
 
   final AppDatabase _db;
 
+  /// Cherche une offre déjà connue qui serait la même, venue d'une autre
+  /// source. La comparaison se fait en Dart et non en SQL : `canonTitle` et
+  /// `canonCity` ne sont pas exprimables en SQLite sans dupliquer leur logique,
+  /// et le nombre d'offres à parcourir se compte en centaines.
+  Future<Offer?> _findCrossSourceDuplicate({
+    required String source,
+    required String title,
+    String? company,
+    String? location,
+  }) async {
+    final candidate = DedupCandidate(
+      source: source,
+      title: title,
+      company: company,
+      location: location,
+    );
+    // On ne compare qu'aux offres des AUTRES sources : la règle les exige
+    // différentes, autant ne pas charger le reste.
+    final others = await (_db.select(_db.offers)
+          ..where((o) => o.source.equals(source).not()))
+        .get();
+
+    for (final o in others) {
+      final existing = DedupCandidate(
+        source: o.source,
+        title: o.title,
+        company: o.company,
+        location: o.location,
+      );
+      if (isCrossSourceDuplicate(candidate, existing)) return o;
+    }
+    return null;
+  }
+
   /// Enregistre une offre si elle est nouvelle. Le hash est la clé : deux
   /// offres qui se canonicalisent pareil sont la même offre, quelle que soit la
   /// source qui l'a apportée.
@@ -59,6 +94,24 @@ class OffersRepository {
 
     if (annotated.excluded) {
       return const SaveResult(SaveOutcome.excluded);
+    }
+
+    // Rapprochement inter-sources AVANT le hash : une offre rediffusée d'une
+    // source à l'autre a un hash différent (l'entreprise est nommée d'un côté,
+    // vide de l'autre) et passerait donc deux fois. Voir dedup.dart pour
+    // pourquoi la règle est délibérément étroite.
+    final crossSource = await _findCrossSourceDuplicate(
+      source: source,
+      title: title,
+      company: company,
+      location: location,
+    );
+    if (crossSource != null) {
+      return SaveResult(
+        SaveOutcome.duplicate,
+        offerId: crossSource.id,
+        score: crossSource.score,
+      );
     }
 
     // Dédup sur l'URL quand elle existe (identité stable des partages), sinon

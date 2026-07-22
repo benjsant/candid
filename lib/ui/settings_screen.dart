@@ -54,11 +54,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// Collecte quotidienne en arrière-plan.
   bool _dailyCollect = false;
 
+  /// Digest hebdomadaire de la recherche.
+  bool _weeklyDigest = false;
+
   /// Permission de notifier (Android 13+). Sans elle, la collecte tournerait
   /// mais resterait muette : autant le dire plutôt que de laisser croire.
   bool _notificationsAllowed = true;
 
   final _notifications = Notifications();
+
+  Future<void> _setWeeklyDigest(bool enabled) async {
+    if (enabled) {
+      await _notifications.init();
+      if (!await _notifications.isAllowed) {
+        await _notifications.requestPermission();
+      }
+    }
+    await widget.prefs.setWeeklyDigest(enabled);
+    await syncWeeklyDigest(enabled);
+    if (!mounted) return;
+    setState(() => _weeklyDigest = enabled);
+  }
 
   Future<void> _setDailyCollect(bool enabled) async {
     if (enabled) {
@@ -89,6 +105,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _provider = await _agentConfig.provider();
     _modelController.text = await _agentConfig.model();
     _dailyCollect = await widget.prefs.dailyCollect();
+    _weeklyDigest = await widget.prefs.weeklyDigest();
     await _notifications.init();
     _notificationsAllowed = await _notifications.isAllowed;
     if (mounted) setState(() => _loading = false);
@@ -246,6 +263,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   },
                 ),
+              SwitchListTile(
+                secondary: const Icon(Icons.calendar_month_outlined),
+                title: const Text('Digest hebdomadaire'),
+                subtitle: Text(
+                  _weeklyDigest
+                      ? 'Une fois par semaine : ce que vous avez collecté, '
+                          'envoyé, et les relances à faire.'
+                      : 'Désactivé. Le point hebdomadaire sur votre recherche.',
+                ),
+                value: _weeklyDigest,
+                onChanged: _setWeeklyDigest,
+              ),
               if (_dailyCollect)
                 const ListTile(
                   leading: Icon(Icons.info_outline),

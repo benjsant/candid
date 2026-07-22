@@ -18,6 +18,7 @@ import 'package:workmanager/workmanager.dart';
 import '../core/notifications.dart';
 import '../core/secrets.dart';
 import '../data/database.dart';
+import '../data/digest_service.dart';
 import '../data/offers_repository.dart';
 import '../sources/collect_service.dart';
 import '../sources/france_travail.dart';
@@ -34,6 +35,11 @@ const kCollectTaskUnique = 'candid-collecte-quotidienne';
 const kCollectOnceName = 'candid-collecte-ponctuelle';
 const kCollectOnceUnique = 'candid-collecte-ponctuelle';
 
+/// Digest hebdomadaire : le point sur la recherche, pas sur la collecte.
+const kDigestTaskName = 'candid-digest-hebdo';
+const kDigestTaskUnique = 'candid-digest-hebdo';
+const kDigestFrequency = Duration(days: 7);
+
 /// Périodicité. Android impose un minimum de 15 minutes ; une fois par jour est
 /// largement suffisant pour des offres d'emploi, et ménage la batterie.
 const kCollectFrequency = Duration(hours: 24);
@@ -44,6 +50,7 @@ const kCollectFrequency = Duration(hours: 24);
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
+    if (task == kDigestTaskName) return runDigestInBackground();
     if (task != kCollectTaskName && task != kCollectOnceName) return true;
     return runCollectInBackground();
   });
@@ -120,5 +127,42 @@ Future<void> runCollectOnceInBackground() async {
     '$kCollectOnceUnique-${DateTime.now().millisecondsSinceEpoch}',
     kCollectOnceName,
     constraints: Constraints(networkType: NetworkType.connected),
+  );
+}
+
+/// Construit et notifie le digest hebdomadaire. Ne touche à aucune API : tout
+/// se lit dans la base locale, donc pas de clé requise et pas de réseau.
+@pragma('vm:entry-point')
+Future<bool> runDigestInBackground() async {
+  final db = AppDatabase();
+  try {
+    final digest = await DigestService(db).build();
+    final message = digestNotification(digest);
+    if (message != null) {
+      final notifications = Notifications();
+      await notifications.init();
+      await notifications.show(message.title, message.body,
+          id: kDigestNotificationId);
+    }
+    return true;
+  } catch (_) {
+    return false;
+  } finally {
+    await db.close();
+  }
+}
+
+/// Planifie ou annule le digest hebdomadaire.
+Future<void> syncWeeklyDigest(bool enabled) async {
+  if (!enabled) {
+    await Workmanager().cancelByUniqueName(kDigestTaskUnique);
+    return;
+  }
+  await Workmanager().registerPeriodicTask(
+    kDigestTaskUnique,
+    kDigestTaskName,
+    frequency: kDigestFrequency,
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+    // Aucun appel réseau : le digest se calcule sur la base locale.
   );
 }

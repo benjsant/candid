@@ -18,6 +18,10 @@ const _channelDescription =
     'Résumé de la collecte quotidienne : combien de nouvelles offres, et '
     'combien méritent un coup d\'œil.';
 
+/// Identifiants de notification. Un par type de message.
+const kCollectNotificationId = 1;
+const kDigestNotificationId = 2;
+
 /// Seuil au-delà duquel une offre est signalée comme intéressante. Aligné sur
 /// le `score_threshold` par défaut du profil de recherche.
 const kNotableScore = 75;
@@ -51,11 +55,13 @@ class Notifications {
     return await android?.areNotificationsEnabled() ?? false;
   }
 
-  Future<void> show(String title, String body) async {
+  Future<void> show(String title, String body,
+      {int id = kCollectNotificationId}) async {
     await _plugin.show(
-      // Identifiant fixe : une nouvelle collecte remplace le résumé précédent
-      // au lieu d'empiler des notifications périmées.
-      id: 1,
+      // Identifiant fixe par type : un nouveau résumé remplace le précédent au
+      // lieu d'empiler des notifications périmées. Le digest a le sien, pour ne
+      // pas écraser le bilan de collecte du matin.
+      id: id,
       title: title,
       body: body,
       notificationDetails: const NotificationDetails(

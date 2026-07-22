@@ -33,18 +33,44 @@ class ExportService {
   }
 
   /// Écrit l'export dans un fichier temporaire et ouvre le partage.
+  ///
+  /// Le fichier est **effacé après le partage**. Il contient tout l'historique
+  /// de candidatures ; le laisser traîner dans le cache le rendrait lisible par
+  /// une sauvegarde future ou par quiconque obtiendrait un accès au dossier de
+  /// l'application. La copie qui compte est celle que l'utilisateur a envoyée
+  /// vers Drive ou sa messagerie.
   Future<void> shareExport() async {
     final json = const JsonEncoder.withIndent('  ').convert(await snapshot());
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/candid-export-${_stamp()}.json');
     await file.writeAsString(json);
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path, mimeType: 'application/json')],
-        subject: 'Export Candid',
-        text: 'Sauvegarde de vos offres et candidatures Candid.',
-      ),
-    );
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/json')],
+          subject: 'Export Candid',
+          text: 'Sauvegarde de vos offres et candidatures Candid.',
+        ),
+      );
+    } finally {
+      await _cleanUp(dir, file);
+    }
+  }
+
+  /// Efface l'export qui vient d'être partagé, et les exports d'anciennes
+  /// versions restés dans le cache.
+  Future<void> _cleanUp(Directory dir, File current) async {
+    try {
+      if (await current.exists()) await current.delete();
+      await for (final entry in dir.list()) {
+        if (entry is File && entry.path.contains('candid-export-')) {
+          await entry.delete();
+        }
+      }
+    } catch (_) {
+      // Le nettoyage est un confort de sécurité, pas une opération critique :
+      // il ne doit jamais faire échouer un export qui a réussi.
+    }
   }
 
   static String _stamp() {

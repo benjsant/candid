@@ -40,4 +40,14 @@ class AppPrefs {
 
   Future<void> setDailyCollect(bool enabled) =>
       _storage.write(key: _kDailyCollect, value: enabled.toString());
+
+  static const _kWeeklyDigest = 'weekly_digest';
+
+  /// Digest hebdomadaire. Désactivé par défaut, comme la collecte : c'est une
+  /// notification de plus, elle doit être voulue.
+  Future<bool> weeklyDigest() async =>
+      (await _storage.read(key: _kWeeklyDigest)) == 'true';
+
+  Future<void> setWeeklyDigest(bool enabled) =>
+      _storage.write(key: _kWeeklyDigest, value: enabled.toString());
 }

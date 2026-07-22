@@ -49,6 +49,7 @@ Future<void> main() async {
   try {
     await Workmanager().initialize(callbackDispatcher);
     await syncDailyCollect(await prefs.dailyCollect());
+    await syncWeeklyDigest(await prefs.weeklyDigest());
   } catch (_) {
     // La collecte manuelle reste disponible : on n'insiste pas.
   }

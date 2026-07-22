@@ -259,8 +259,25 @@ Le bouton de collecte manuelle reste la voie fiable, et l'écran le dit.
 
 ## Étape 7 : facultatif
 
-- [ ] Dédup sémantique embarquée (MiniLM quantifié en ONNX, cosinus en Dart)
-- [ ] Digest hebdomadaire
+- [x] **Rapprochement inter-sources** (`lib/domain/dedup.dart`, 22/07/2026).
+      **Le modèle ONNX n'a PAS été embarqué**, et c'est un choix documenté :
+      l'examen des 125 offres réellement collectées montre que « même titre »
+      ne veut pas dire « même offre » (trois « Data manager » chez NEW NET 3D,
+      ADECCO et LE CABRH). Une similarité large aurait **masqué de vraies
+      offres** — le coût d'une erreur est asymétrique. La règle exige donc
+      simultanément : sources différentes, même titre canonicalisé, même ville,
+      entreprises compatibles (identiques ou l'une vide).
+      Validée contre les 125 offres réelles : **1 seule paire rapprochée**,
+      exactement le doublon FT/LBA documenté. Vérifiée sur appareil (retrait de
+      la version LBA puis re-collecte : non réajoutée).
+- [x] **Digest hebdomadaire** (`lib/data/digest_service.dart`) : offres
+      collectées, candidatures envoyées, réponses, **relances dues** et
+      candidatures sans réponse. L'action à faire passe avant le bilan, c'est
+      elle qui justifie d'ouvrir. Silencieux si la semaine est vide ET qu'il n'y
+      a rien à faire. Aucun réseau, aucune clé : tout se lit en base.
+      Désactivé par défaut. Vérifié : activation OK, 2 jobs planifiés (collecte
+      + digest) ; sur la base réelle il annoncerait « Cette semaine : 124 offres
+      collectées, 1 candidature envoyée / 1 sans réponse ».
 - [x] **Candidature spontanée depuis les entreprises remontées par LBA** (fait
       le 22/07/2026). `companies_repository.dart` + onglet « À démarcher ».
       Dédup par **SIRET** d'abord (deux établissements peuvent porter le même
@@ -276,5 +293,5 @@ Le bouton de collecte manuelle reste la voie fiable, et l'écran le dit.
       secteur, **aucune avec description**. Contacts réellement disponibles :
       lien LBA 194/194, téléphone 59/194, email 0/194 — l'écran n'affiche que
       les boutons possibles.
-- [ ] Import ponctuel de l'historique depuis le dump PostgreSQL
+- [ ] Import ponctuel de l'historique depuis le dump PostgreSQL (non demandé)
       (`/mnt/Data/Dev/migration-n8n/db/`)
