@@ -9,6 +9,7 @@ import 'package:candid/data/offers_repository.dart';
 import 'package:candid/data/profile_repository.dart';
 import 'package:candid/sources/collect_service.dart';
 import 'package:candid/sources/france_travail.dart';
+import 'package:candid/sources/geo.dart';
 import 'package:candid/sources/lba.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
@@ -17,10 +18,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Répond à la place du réseau.
 class _FakeTransport extends Interceptor {
-  _FakeTransport(this.offers);
+  _FakeTransport(this.offers, {this.recruiters = const []});
 
   /// Offres brutes au format France Travail que l'API est censée renvoyer.
   List<Map<String, dynamic>> offers;
+
+  /// Entreprises à démarcher renvoyées par La Bonne Alternance.
+  final List<Map<String, dynamic>> recruiters;
 
   final List<RequestOptions> calls = [];
 
@@ -29,7 +33,9 @@ class _FakeTransport extends Interceptor {
     calls.add(options);
     final body = options.path.contains('access_token')
         ? {'access_token': 'jeton', 'expires_in': 1499}
-        : {'resultats': offers};
+        : options.path.contains('apprentissage')
+            ? {'jobs': <dynamic>[], 'recruiters': recruiters}
+            : {'resultats': offers};
     handler.resolve(
       Response<dynamic>(requestOptions: options, statusCode: 200, data: body),
     );
@@ -63,6 +69,11 @@ void main() {
           secrets: Secrets(),
           dio: Dio()..interceptors.add(transport),
         ),
+        // Géocodeur simulé : la vraie résolution sort sur le réseau, qui est
+        // coupé en test.
+        geocoder: (codes) async => {
+          for (final c in codes) c: const LatLng(50.36, 3.51),
+        },
       );
 
   test('collecte : les offres arrivent en base avec un score', () async {
@@ -186,6 +197,36 @@ void main() {
 
     expect(report.saved, 2);
     expect(report.notable, 1, reason: 'seule la première dépasse le seuil');
+  });
+
+  test('les entreprises à démarcher vont dans companies, pas dans offers',
+      () async {
+    // Elles n'ont aucun poste publié : les enregistrer comme des offres
+    // reviendrait à inventer une annonce.
+    FlutterSecureStorage.setMockInitialValues({
+      SecretKey.franceTravailClientId.storageKey: 'id',
+      SecretKey.franceTravailClientSecret.storageKey: 'secret',
+      SecretKey.lbaApiKey.storageKey: 'cle-lba',
+    });
+    await ProfileRepository(db).save(
+      keywords: 'python',
+      locationLabel: 'Valenciennes (59)',
+      locationInsee: '59606',
+      radiusKm: 30,
+    );
+    final transport = _FakeTransport([], recruiters: [
+      {
+        'identifier': {'id': 'r-1'},
+        'workplace': {'name': 'ACME', 'siret': '12345678900011'},
+      },
+    ]);
+
+    final report = await serviceWith(transport).collect();
+
+    expect(report.recruiters, 1);
+    expect(await db.select(db.companies).get(), hasLength(1));
+    expect(await db.select(db.offers).get(), isEmpty,
+        reason: 'aucune annonce fabriquée');
   });
 
   test('le résumé est lisible', () async {

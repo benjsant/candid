@@ -14,11 +14,15 @@ import '../data/database.dart';
 import '../data/offers_repository.dart';
 import '../domain/scoring.dart';
 import '../core/notifications.dart';
+import '../data/companies_repository.dart';
 import '../data/profile_repository.dart';
 import 'france_travail.dart';
 import 'geo.dart';
 import 'lba.dart';
 import 'normalize.dart';
+
+/// Résout des codes INSEE en coordonnées. Signature de `communeCoordinates`.
+typedef Geocoder = Future<Map<String, LatLng>> Function(List<String> codes);
 
 /// Bilan d'une collecte, affichable tel quel.
 class CollectReport {
@@ -38,9 +42,9 @@ class CollectReport {
   final int duplicates;
   final int excluded;
 
-  /// Entreprises à démarcher remontées par La Bonne Alternance. Ce ne sont pas
-  /// des offres (aucun poste publié), donc elles ne sont pas enregistrées comme
-  /// telles. On les compte pour ne pas perdre l'information.
+  /// **Nouvelles** entreprises à démarcher, enregistrées dans `companies`.
+  /// Ce ne sont pas des offres : aucun poste n'est publié, il n'y a donc rien
+  /// à scorer ni à afficher comme une annonce.
   final int recruiters;
 
   /// Parmi les nouvelles, combien dépassent le seuil d'intérêt. C'est ce
@@ -64,7 +68,7 @@ class CollectReport {
     ];
     final base = 'Collecte : ${parts.join(', ')} (sur $fetched).'
         '${recruiters > 0 ? ' $recruiters entreprise'
-            '${recruiters > 1 ? 's' : ''} à démarcher (non enregistrées).' : ''}';
+            '${recruiters > 1 ? 's' : ''} à démarcher.' : ''}';
     return errors.isEmpty ? base : '$base ${errors.join(' ')}';
   }
 }
@@ -75,6 +79,8 @@ class CollectService {
     required OffersRepository repository,
     required FranceTravailClient franceTravail,
     required LbaClient lba,
+    CompaniesRepository? companies,
+    Geocoder? geocoder,
   })  // Les champs restent privés, et un paramètre nommé ne peut pas l'être :
       // l'initializing formal suggéré par le linter est ici impossible.
       // ignore: prefer_initializing_formals
@@ -84,12 +90,20 @@ class CollectService {
         // ignore: prefer_initializing_formals
         _franceTravail = franceTravail,
         // ignore: prefer_initializing_formals
-        _lba = lba;
+        _lba = lba,
+        _companies = companies ?? CompaniesRepository(db),
+        _geocoder = geocoder ?? communeCoordinates;
 
   final AppDatabase _db;
   final OffersRepository _repository;
   final FranceTravailClient _franceTravail;
   final LbaClient _lba;
+  final CompaniesRepository _companies;
+
+  /// Résolution code INSEE -> coordonnées. Injectable : sans ça, le service
+  /// appelait une fonction globale qui sort sur le réseau, ce qui rendait la
+  /// branche La Bonne Alternance intestable.
+  final Geocoder _geocoder;
 
   /// Lance une collecte sur toutes les sources configurées.
   Future<CollectReport> collect() async {
@@ -148,7 +162,7 @@ class CollectService {
       try {
         final communes =
             ProfileCommunes.parse(profile?.locationLabel, profile?.locationInsee);
-        final coords = await communeCoordinates(communes.codes);
+        final coords = await _geocoder(communes.codes);
         if (coords.isEmpty) {
           errors.add('La Bonne Alternance : aucune commune localisable.');
         }
@@ -160,7 +174,9 @@ class CollectService {
             romeCodes: profile?.romeCodes ?? kDefaultRomeCodes,
           );
           collectAll(result.jobs);
-          recruiters += result.recruiterCount;
+          // Enregistrées comme ENTREPRISES, jamais comme offres : sans poste
+          // publié, il n'y a pas d'annonce à afficher.
+          recruiters += await _companies.saveAll(result.recruiters);
         }
       } on LbaUnavailable catch (e) {
         errors.add(e.message);

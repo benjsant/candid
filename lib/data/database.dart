@@ -107,6 +107,16 @@ class Companies extends Table {
   TextColumn get sector => text().nullable()();
   TextColumn get description => text().nullable()();
 
+  /// Ajoutés en v2 pour les entreprises « à démarcher » de La Bonne Alternance.
+  /// Le SIRET est la seule identité fiable : deux établissements peuvent porter
+  /// le même nom commercial.
+  TextColumn get siret => text().nullable()();
+  TextColumn get location => text().nullable()();
+
+  /// D'où vient la fiche (`la_bonne_alternance`). Une entreprise saisie à la
+  /// main un jour ne devra pas être écrasée par une collecte.
+  TextColumn get source => text().nullable()();
+
   /// Résumé produit par l'agent, toujours fondé sur une source réelle.
   TextColumn get aiSummary => text().nullable()();
   TextColumn get applyUrl => text().nullable()();
@@ -168,11 +178,26 @@ class AppDatabase extends _$AppDatabase {
 
   AppDatabase.forTesting(super.executor);
 
+  /// v2 (22/07/2026) : `companies` gagne siret, location et source, pour les
+  /// entreprises à démarcher remontées par La Bonne Alternance.
+  ///
+  /// **Première migration écrite avec des installations réelles en service.**
+  /// Elle ajoute des colonnes nullables, donc aucune donnée existante n'est
+  /// touchée ni perdue. Toute évolution ultérieure doit incrémenter ce numéro
+  /// ET ajouter son cas ici : sauter cette étape corromprait les bases
+  /// installées de façon silencieuse.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(companies, companies.siret);
+            await m.addColumn(companies, companies.location);
+            await m.addColumn(companies, companies.source);
+          }
+        },
         beforeOpen: (details) async {
           // Sans ça, SQLite ignore silencieusement les clés étrangères.
           await customStatement('PRAGMA foreign_keys = ON');

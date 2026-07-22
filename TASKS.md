@@ -261,6 +261,20 @@ Le bouton de collecte manuelle reste la voie fiable, et l'écran le dit.
 
 - [ ] Dédup sémantique embarquée (MiniLM quantifié en ONNX, cosinus en Dart)
 - [ ] Digest hebdomadaire
-- [ ] Candidature spontanée depuis les entreprises remontées par LBA
+- [x] **Candidature spontanée depuis les entreprises remontées par LBA** (fait
+      le 22/07/2026). `companies_repository.dart` + onglet « À démarcher ».
+      Dédup par **SIRET** d'abord (deux établissements peuvent porter le même
+      nom), nom en repli. Une fiche modifiée à la main n'est jamais écrasée par
+      une collecte. **Garde-fou testé : aucun poste n'est fabriqué** — ni titre,
+      ni description, et rien n'atterrit dans la boîte aux offres. L'écran le
+      dit en toutes lettres.
+      Schéma **v2** : `companies` gagne siret, location, source. Première
+      migration écrite avec une installation réelle en service : colonnes
+      nullables, aucune donnée touchée. Vérifiée sur l'appareil (125 offres,
+      1 candidature, 1 profil intacts).
+      ✅ Vérifié en réel : 194 entreprises collectées, toutes avec SIRET et
+      secteur, **aucune avec description**. Contacts réellement disponibles :
+      lien LBA 194/194, téléphone 59/194, email 0/194 — l'écran n'affiche que
+      les boutons possibles.
 - [ ] Import ponctuel de l'historique depuis le dump PostgreSQL
       (`/mnt/Data/Dev/migration-n8n/db/`)

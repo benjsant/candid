@@ -74,5 +74,22 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Android 11+ : sans ces déclarations, url_launcher ne « voit » pas
+             les applications capables d'ouvrir un mail, un appel ou un lien,
+             et les boutons de contact des entreprises resteraient inertes.
+             On déclare l'intention de les ouvrir, jamais d'envoyer : c'est
+             l'utilisateur qui rédige et qui envoie. -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="mailto"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+            <data android:scheme="tel"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
     </queries>
 </manifest>

@@ -18,6 +18,7 @@ import 'background/collect_task.dart';
 import 'core/app_prefs.dart';
 import 'core/secrets.dart';
 import 'data/applications_repository.dart';
+import 'data/companies_repository.dart';
 import 'data/database.dart';
 import 'data/export_service.dart';
 import 'data/offers_repository.dart';
@@ -26,6 +27,7 @@ import 'sources/collect_service.dart';
 import 'sources/france_travail.dart';
 import 'sources/lba.dart';
 import 'sources/shared_text.dart';
+import 'ui/companies_screen.dart';
 import 'ui/offers_screen.dart';
 import 'ui/receive_share_screen.dart';
 import 'ui/settings_screen.dart';
@@ -56,6 +58,7 @@ Future<void> main() async {
       applications: ApplicationsRepository(db),
       export: ExportService(db),
       profiles: ProfileRepository(db),
+      companies: CompaniesRepository(db),
       collect: CollectService(
         db: db,
         repository: repository,
@@ -76,6 +79,7 @@ class CandidApp extends StatelessWidget {
     required this.applications,
     required this.export,
     required this.profiles,
+    required this.companies,
     required this.collect,
     required this.secrets,
     required this.prefs,
@@ -86,6 +90,7 @@ class CandidApp extends StatelessWidget {
   final ApplicationsRepository applications;
   final ExportService export;
   final ProfileRepository profiles;
+  final CompaniesRepository companies;
   final CollectService collect;
   final Secrets secrets;
   final AppPrefs prefs;
@@ -115,6 +120,7 @@ class CandidApp extends StatelessWidget {
           applications: applications,
           export: export,
           profiles: profiles,
+          companies: companies,
           collect: collect,
           secrets: secrets,
           prefs: prefs,
@@ -132,6 +138,7 @@ class HomeScreen extends StatefulWidget {
     required this.applications,
     required this.export,
     required this.profiles,
+    required this.companies,
     required this.collect,
     required this.secrets,
     required this.prefs,
@@ -142,6 +149,7 @@ class HomeScreen extends StatefulWidget {
   final ApplicationsRepository applications;
   final ExportService export;
   final ProfileRepository profiles;
+  final CompaniesRepository companies;
   final CollectService collect;
   final Secrets secrets;
   final AppPrefs prefs;
@@ -167,6 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
       applications: widget.applications,
       secrets: widget.secrets,
     ),
+    CompaniesScreen(repository: widget.companies),
     TrackingScreen(repository: widget.applications),
     SettingsScreen(
       secrets: widget.secrets,
@@ -258,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(['Offres', 'Suivi', 'Réglages'][_tab]),
+        title: Text(['Offres', 'À démarcher', 'Suivi', 'Réglages'][_tab]),
         actions: [
           // Collecte manuelle sur l'onglet Offres. Elle reste déclenchée à la
           // main : la version périodique (workmanager) vient ensuite, et n'est
@@ -281,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: _collect,
                   ),
           // Export sur l'onglet Suivi : sauvegarder offres + candidatures.
-          if (_tab == 1)
+          if (_tab == 2)
             IconButton(
               icon: const Icon(Icons.ios_share),
               tooltip: 'Exporter mes données',
@@ -298,6 +307,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.inbox_outlined),
             selectedIcon: Icon(Icons.inbox),
             label: 'Offres',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.domain_outlined),
+            selectedIcon: Icon(Icons.domain),
+            label: 'À démarcher',
           ),
           NavigationDestination(
             icon: Icon(Icons.timeline_outlined),

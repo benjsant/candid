@@ -123,6 +123,16 @@ un peu moins par appareil.
 
 ## Journal
 
+- **22/07/2026 (soir)** : étape 7, premier item. Les entreprises « à démarcher »
+  de LBA (~194) étaient collectées puis jetées : elles sont maintenant en base
+  et dans un onglet dédié. Trois points. (1) **Première migration de schéma avec
+  une installation réelle** (v1→v2) : sauvegarde de la base AVANT, colonnes
+  nullables uniquement, vérification des comptes APRÈS. Le protocole à reprendre
+  pour toute évolution future. (2) Le garde-fou est explicite ET testé : une
+  entreprise sans offre publiée ne devient jamais une annonce. (3) `CollectService`
+  appelait `communeCoordinates` en global, ce qui rendait la branche LBA
+  intestable ; le géocodeur est désormais injectable. Un test qui échoue pour de
+  mauvaises raisons signale souvent un vrai défaut de conception.
 - **22/07/2026** : étape 6 close. Collecte de fond (`workmanager`) +
   notifications vérifiées application fermée : « 19 nouvelles offres, 3
   dépassent 75/100 ». Trois choses apprises. (1) `flutter_local_notifications`

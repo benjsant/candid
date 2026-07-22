@@ -1931,6 +1931,35 @@ class $CompaniesTable extends Companies
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _siretMeta = const VerificationMeta('siret');
+  @override
+  late final GeneratedColumn<String> siret = GeneratedColumn<String>(
+    'siret',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _locationMeta = const VerificationMeta(
+    'location',
+  );
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _aiSummaryMeta = const VerificationMeta(
     'aiSummary',
   );
@@ -1990,6 +2019,9 @@ class $CompaniesTable extends Companies
     website,
     sector,
     description,
+    siret,
+    location,
+    source,
     aiSummary,
     applyUrl,
     phone,
@@ -2038,6 +2070,24 @@ class $CompaniesTable extends Companies
           data['description']!,
           _descriptionMeta,
         ),
+      );
+    }
+    if (data.containsKey('siret')) {
+      context.handle(
+        _siretMeta,
+        siret.isAcceptableOrUnknown(data['siret']!, _siretMeta),
+      );
+    }
+    if (data.containsKey('location')) {
+      context.handle(
+        _locationMeta,
+        location.isAcceptableOrUnknown(data['location']!, _locationMeta),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
       );
     }
     if (data.containsKey('ai_summary')) {
@@ -2102,6 +2152,18 @@ class $CompaniesTable extends Companies
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
+      siret: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}siret'],
+      ),
+      location: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location'],
+      ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      ),
       aiSummary: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}ai_summary'],
@@ -2138,6 +2200,16 @@ class Company extends DataClass implements Insertable<Company> {
   final String? sector;
   final String? description;
 
+  /// Ajoutés en v2 pour les entreprises « à démarcher » de La Bonne Alternance.
+  /// Le SIRET est la seule identité fiable : deux établissements peuvent porter
+  /// le même nom commercial.
+  final String? siret;
+  final String? location;
+
+  /// D'où vient la fiche (`la_bonne_alternance`). Une entreprise saisie à la
+  /// main un jour ne devra pas être écrasée par une collecte.
+  final String? source;
+
   /// Résumé produit par l'agent, toujours fondé sur une source réelle.
   final String? aiSummary;
   final String? applyUrl;
@@ -2150,6 +2222,9 @@ class Company extends DataClass implements Insertable<Company> {
     this.website,
     this.sector,
     this.description,
+    this.siret,
+    this.location,
+    this.source,
     this.aiSummary,
     this.applyUrl,
     this.phone,
@@ -2169,6 +2244,15 @@ class Company extends DataClass implements Insertable<Company> {
     }
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || siret != null) {
+      map['siret'] = Variable<String>(siret);
+    }
+    if (!nullToAbsent || location != null) {
+      map['location'] = Variable<String>(location);
+    }
+    if (!nullToAbsent || source != null) {
+      map['source'] = Variable<String>(source);
     }
     if (!nullToAbsent || aiSummary != null) {
       map['ai_summary'] = Variable<String>(aiSummary);
@@ -2199,6 +2283,15 @@ class Company extends DataClass implements Insertable<Company> {
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
+      siret: siret == null && nullToAbsent
+          ? const Value.absent()
+          : Value(siret),
+      location: location == null && nullToAbsent
+          ? const Value.absent()
+          : Value(location),
+      source: source == null && nullToAbsent
+          ? const Value.absent()
+          : Value(source),
       aiSummary: aiSummary == null && nullToAbsent
           ? const Value.absent()
           : Value(aiSummary),
@@ -2226,6 +2319,9 @@ class Company extends DataClass implements Insertable<Company> {
       website: serializer.fromJson<String?>(json['website']),
       sector: serializer.fromJson<String?>(json['sector']),
       description: serializer.fromJson<String?>(json['description']),
+      siret: serializer.fromJson<String?>(json['siret']),
+      location: serializer.fromJson<String?>(json['location']),
+      source: serializer.fromJson<String?>(json['source']),
       aiSummary: serializer.fromJson<String?>(json['aiSummary']),
       applyUrl: serializer.fromJson<String?>(json['applyUrl']),
       phone: serializer.fromJson<String?>(json['phone']),
@@ -2242,6 +2338,9 @@ class Company extends DataClass implements Insertable<Company> {
       'website': serializer.toJson<String?>(website),
       'sector': serializer.toJson<String?>(sector),
       'description': serializer.toJson<String?>(description),
+      'siret': serializer.toJson<String?>(siret),
+      'location': serializer.toJson<String?>(location),
+      'source': serializer.toJson<String?>(source),
       'aiSummary': serializer.toJson<String?>(aiSummary),
       'applyUrl': serializer.toJson<String?>(applyUrl),
       'phone': serializer.toJson<String?>(phone),
@@ -2256,6 +2355,9 @@ class Company extends DataClass implements Insertable<Company> {
     Value<String?> website = const Value.absent(),
     Value<String?> sector = const Value.absent(),
     Value<String?> description = const Value.absent(),
+    Value<String?> siret = const Value.absent(),
+    Value<String?> location = const Value.absent(),
+    Value<String?> source = const Value.absent(),
     Value<String?> aiSummary = const Value.absent(),
     Value<String?> applyUrl = const Value.absent(),
     Value<String?> phone = const Value.absent(),
@@ -2267,6 +2369,9 @@ class Company extends DataClass implements Insertable<Company> {
     website: website.present ? website.value : this.website,
     sector: sector.present ? sector.value : this.sector,
     description: description.present ? description.value : this.description,
+    siret: siret.present ? siret.value : this.siret,
+    location: location.present ? location.value : this.location,
+    source: source.present ? source.value : this.source,
     aiSummary: aiSummary.present ? aiSummary.value : this.aiSummary,
     applyUrl: applyUrl.present ? applyUrl.value : this.applyUrl,
     phone: phone.present ? phone.value : this.phone,
@@ -2282,6 +2387,9 @@ class Company extends DataClass implements Insertable<Company> {
       description: data.description.present
           ? data.description.value
           : this.description,
+      siret: data.siret.present ? data.siret.value : this.siret,
+      location: data.location.present ? data.location.value : this.location,
+      source: data.source.present ? data.source.value : this.source,
       aiSummary: data.aiSummary.present ? data.aiSummary.value : this.aiSummary,
       applyUrl: data.applyUrl.present ? data.applyUrl.value : this.applyUrl,
       phone: data.phone.present ? data.phone.value : this.phone,
@@ -2300,6 +2408,9 @@ class Company extends DataClass implements Insertable<Company> {
           ..write('website: $website, ')
           ..write('sector: $sector, ')
           ..write('description: $description, ')
+          ..write('siret: $siret, ')
+          ..write('location: $location, ')
+          ..write('source: $source, ')
           ..write('aiSummary: $aiSummary, ')
           ..write('applyUrl: $applyUrl, ')
           ..write('phone: $phone, ')
@@ -2316,6 +2427,9 @@ class Company extends DataClass implements Insertable<Company> {
     website,
     sector,
     description,
+    siret,
+    location,
+    source,
     aiSummary,
     applyUrl,
     phone,
@@ -2331,6 +2445,9 @@ class Company extends DataClass implements Insertable<Company> {
           other.website == this.website &&
           other.sector == this.sector &&
           other.description == this.description &&
+          other.siret == this.siret &&
+          other.location == this.location &&
+          other.source == this.source &&
           other.aiSummary == this.aiSummary &&
           other.applyUrl == this.applyUrl &&
           other.phone == this.phone &&
@@ -2344,6 +2461,9 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
   final Value<String?> website;
   final Value<String?> sector;
   final Value<String?> description;
+  final Value<String?> siret;
+  final Value<String?> location;
+  final Value<String?> source;
   final Value<String?> aiSummary;
   final Value<String?> applyUrl;
   final Value<String?> phone;
@@ -2355,6 +2475,9 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
     this.website = const Value.absent(),
     this.sector = const Value.absent(),
     this.description = const Value.absent(),
+    this.siret = const Value.absent(),
+    this.location = const Value.absent(),
+    this.source = const Value.absent(),
     this.aiSummary = const Value.absent(),
     this.applyUrl = const Value.absent(),
     this.phone = const Value.absent(),
@@ -2367,6 +2490,9 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
     this.website = const Value.absent(),
     this.sector = const Value.absent(),
     this.description = const Value.absent(),
+    this.siret = const Value.absent(),
+    this.location = const Value.absent(),
+    this.source = const Value.absent(),
     this.aiSummary = const Value.absent(),
     this.applyUrl = const Value.absent(),
     this.phone = const Value.absent(),
@@ -2379,6 +2505,9 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
     Expression<String>? website,
     Expression<String>? sector,
     Expression<String>? description,
+    Expression<String>? siret,
+    Expression<String>? location,
+    Expression<String>? source,
     Expression<String>? aiSummary,
     Expression<String>? applyUrl,
     Expression<String>? phone,
@@ -2391,6 +2520,9 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
       if (website != null) 'website': website,
       if (sector != null) 'sector': sector,
       if (description != null) 'description': description,
+      if (siret != null) 'siret': siret,
+      if (location != null) 'location': location,
+      if (source != null) 'source': source,
       if (aiSummary != null) 'ai_summary': aiSummary,
       if (applyUrl != null) 'apply_url': applyUrl,
       if (phone != null) 'phone': phone,
@@ -2405,6 +2537,9 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
     Value<String?>? website,
     Value<String?>? sector,
     Value<String?>? description,
+    Value<String?>? siret,
+    Value<String?>? location,
+    Value<String?>? source,
     Value<String?>? aiSummary,
     Value<String?>? applyUrl,
     Value<String?>? phone,
@@ -2417,6 +2552,9 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
       website: website ?? this.website,
       sector: sector ?? this.sector,
       description: description ?? this.description,
+      siret: siret ?? this.siret,
+      location: location ?? this.location,
+      source: source ?? this.source,
       aiSummary: aiSummary ?? this.aiSummary,
       applyUrl: applyUrl ?? this.applyUrl,
       phone: phone ?? this.phone,
@@ -2442,6 +2580,15 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
     }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
+    }
+    if (siret.present) {
+      map['siret'] = Variable<String>(siret.value);
+    }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
     }
     if (aiSummary.present) {
       map['ai_summary'] = Variable<String>(aiSummary.value);
@@ -2469,6 +2616,9 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
           ..write('website: $website, ')
           ..write('sector: $sector, ')
           ..write('description: $description, ')
+          ..write('siret: $siret, ')
+          ..write('location: $location, ')
+          ..write('source: $source, ')
           ..write('aiSummary: $aiSummary, ')
           ..write('applyUrl: $applyUrl, ')
           ..write('phone: $phone, ')
@@ -4876,6 +5026,9 @@ typedef $$CompaniesTableCreateCompanionBuilder =
       Value<String?> website,
       Value<String?> sector,
       Value<String?> description,
+      Value<String?> siret,
+      Value<String?> location,
+      Value<String?> source,
       Value<String?> aiSummary,
       Value<String?> applyUrl,
       Value<String?> phone,
@@ -4889,6 +5042,9 @@ typedef $$CompaniesTableUpdateCompanionBuilder =
       Value<String?> website,
       Value<String?> sector,
       Value<String?> description,
+      Value<String?> siret,
+      Value<String?> location,
+      Value<String?> source,
       Value<String?> aiSummary,
       Value<String?> applyUrl,
       Value<String?> phone,
@@ -4950,6 +5106,21 @@ class $$CompaniesTableFilterComposer
 
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get siret => $composableBuilder(
+    column: $table.siret,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5038,6 +5209,21 @@ class $$CompaniesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get siret => $composableBuilder(
+    column: $table.siret,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get aiSummary => $composableBuilder(
     column: $table.aiSummary,
     builder: (column) => ColumnOrderings(column),
@@ -5089,6 +5275,15 @@ class $$CompaniesTableAnnotationComposer
     column: $table.description,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get siret =>
+      $composableBuilder(column: $table.siret, builder: (column) => column);
+
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
 
   GeneratedColumn<String> get aiSummary =>
       $composableBuilder(column: $table.aiSummary, builder: (column) => column);
@@ -5166,6 +5361,9 @@ class $$CompaniesTableTableManager
                 Value<String?> website = const Value.absent(),
                 Value<String?> sector = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<String?> siret = const Value.absent(),
+                Value<String?> location = const Value.absent(),
+                Value<String?> source = const Value.absent(),
                 Value<String?> aiSummary = const Value.absent(),
                 Value<String?> applyUrl = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
@@ -5177,6 +5375,9 @@ class $$CompaniesTableTableManager
                 website: website,
                 sector: sector,
                 description: description,
+                siret: siret,
+                location: location,
+                source: source,
                 aiSummary: aiSummary,
                 applyUrl: applyUrl,
                 phone: phone,
@@ -5190,6 +5391,9 @@ class $$CompaniesTableTableManager
                 Value<String?> website = const Value.absent(),
                 Value<String?> sector = const Value.absent(),
                 Value<String?> description = const Value.absent(),
+                Value<String?> siret = const Value.absent(),
+                Value<String?> location = const Value.absent(),
+                Value<String?> source = const Value.absent(),
                 Value<String?> aiSummary = const Value.absent(),
                 Value<String?> applyUrl = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
@@ -5201,6 +5405,9 @@ class $$CompaniesTableTableManager
                 website: website,
                 sector: sector,
                 description: description,
+                siret: siret,
+                location: location,
+                source: source,
                 aiSummary: aiSummary,
                 applyUrl: applyUrl,
                 phone: phone,

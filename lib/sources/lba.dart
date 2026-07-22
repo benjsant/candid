@@ -39,10 +39,15 @@ const kDefaultRomeCodes = 'M1805';
 /// Ce que rend une recherche : les offres, et le nombre d'entreprises à
 /// démarcher (qu'on ne transforme pas en offres).
 class LbaResult {
-  const LbaResult({this.jobs = const [], this.recruiterCount = 0});
+  const LbaResult({this.jobs = const [], this.recruiters = const []});
 
   final List<NormalizedOffer> jobs;
-  final int recruiterCount;
+
+  /// Entreprises à démarcher. Volontairement séparées des offres : elles n'ont
+  /// pas de poste publié, et en fabriquer un serait inventer.
+  final List<NormalizedRecruiter> recruiters;
+
+  int get recruiterCount => recruiters.length;
 }
 
 class LbaClient {
@@ -106,7 +111,7 @@ class LbaClient {
     final map = body is Map ? body.cast<String, dynamic>() : null;
     return LbaResult(
       jobs: normalizeLaBonneAlternanceJobs(map),
-      recruiterCount: normalizeLbaRecruiters(map).length,
+      recruiters: normalizeLbaRecruiters(map),
     );
   }
 }
