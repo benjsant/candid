@@ -123,6 +123,27 @@ un peu moins par appareil.
 
 ## Journal
 
+- **23/07/2026 (après-midi)** : passe de précision sur le prompt système, après
+  relecture ligne à ligne. Six incohérences trouvées, toutes vérifiées contre le
+  code avant correction. (1) **Deux échelles de score contradictoires** : pour 55,
+  le §4 disait « postuler si peu d'options », le §6 « non pertinent ». Une seule
+  échelle désormais, alignée sur les trois valeurs de `kRecommandations`.
+  (2) `salary_score` était demandé sans critère correspondant dans la grille : le
+  modèle devait inventer un chiffre, dans un projet qui interdit d'inventer.
+  Critère ajouté, aligné sur le scoring local (salaire annoncé = 10 pts), avec
+  consigne explicite de mettre 0 quand l'offre est muette. (3) Le prompt renvoyait
+  vers un champ `gaps` **inexistant** dans le schéma et dans le code. (4) Quatre
+  tirets cadratins dans les messages que le CODE envoie au modèle, alors que le
+  prompt les interdit. (5) Références périmées au projet Docker (n8n, moteur
+  Astro, « sections entre crochets »). (6) **Job Hunter absent du bloc preuve**
+  alors que c'est le projet phare.
+  Vérifié en réel (offre Data Engineer, Externatic) : score 55 → « À postuler si
+  peu d'options » (conforme à l'échelle unique), salaire annoncé pris en compte
+  (« 35-45k€ correct pour un junior »), et Job Hunter enfin cité dans l'accroche.
+  Deux défauts découverts à cette occasion : la puce de recommandation débordait
+  de 31 px sur écran étroit (Row → Wrap), et le juge laissait passer « ma passion
+  pour » alors qu'il rejetait « passionné » (le motif ne couvrait que l'adjectif).
+
 - **23/07/2026** : passe de relecture typographique. 39 tirets cadratins traînaient
   dans la documentation, et **16 dans le prompt système lui-même**, alors que
   celui-ci les interdit à la ligne 154 : le modèle voyait une consigne contre

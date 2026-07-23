@@ -23,14 +23,14 @@ import 'models.dart';
 import 'research.dart';
 
 const _analyzeTask =
-    'TÂCHE — ÉVALUATION. Réponds en JSON UNIQUEMENT avec : score, skills_score, '
+    'TÂCHE : ÉVALUATION. Réponds en JSON UNIQUEMENT avec : score, skills_score, '
     'experience_score, location_score, salary_score, recommandation, '
     'justification_score, matching_skills, missing_skills, competences_a_ameliorer, '
     'conseils, adaptation_cv, personnalisation_cv, objet_email, langue (cf. §6). '
     'N\'inclus PAS de champ "lettre" ici.';
 
 const _accrocheTask =
-    'TÂCHE — ACCROCHE. Choisis le template le plus adapté et rédige UNIQUEMENT '
+    'TÂCHE : ACCROCHE. Choisis le template le plus adapté et rédige UNIQUEMENT '
     'l\'accroche (2-3 phrases, cf. §5/§6 ; le corps de la lettre est figé hors de '
     'toi). Réponds en JSON UNIQUEMENT : '
     '{"lettre": {"template": "<id>", "accroche": "<texte>"}}.';
@@ -64,7 +64,7 @@ class AgentRun {
 String buildUserMessage(AgentOffer offer, String cvIndex) {
   var desc = offer.description;
   if (offer.spontaneous) {
-    desc = 'CANDIDATURE SPONTANÉE — aucune offre publiée. Choisis IMPÉRATIVEMENT '
+    desc = 'CANDIDATURE SPONTANÉE : aucune offre publiée. Choisis IMPÉRATIVEMENT '
         'le template "candidature-spontanee". Infos connues: $desc';
   }
   return 'Offre: ${offer.title} chez ${offer.company}\n\n'
@@ -132,7 +132,7 @@ String _accrocheMessage(
     AgentOffer offer, String cvIndex, String grounding, List<String> problems) {
   final official = grounding.isEmpty
       ? ''
-      : '\n\nFAITS OFFICIELS sur l\'entreprise (registre INSEE — AUTORITATIFS ; '
+      : '\n\nFAITS OFFICIELS sur l\'entreprise (registre INSEE, AUTORITATIFS ; '
           'ne les contredis pas, appuie l\'accroche dessus) :\n$grounding\n';
   final feedback = problems.isEmpty
       ? ''

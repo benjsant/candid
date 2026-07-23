@@ -277,15 +277,22 @@ class _OfferDetailScreenState extends State<OfferDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Text('Score agent : ${out.score}/100',
-                  style: Theme.of(context).textTheme.titleSmall),
-              const Spacer(),
-              Chip(
-                label: Text(reco),
-                visualDensity: VisualDensity.compact,
-              ),
-            ]),
+            // Wrap et non Row : « À postuler si peu d'options » déborde de la
+            // ligne sur un écran étroit (constaté sur l'appareil, 31 px).
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                Text('Score agent : ${out.score}/100',
+                    style: Theme.of(context).textTheme.titleSmall),
+                Chip(
+                  label: Text(reco),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
             if (out.justificationScore.isNotEmpty) ...[
               const SizedBox(height: 6),
               Text(out.justificationScore,

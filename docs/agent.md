@@ -94,6 +94,22 @@ Cette dernière règle vient d'un défaut trouvé en conditions réelles.
 > mais pas « les deux documents se tiennent ». La règle de cohérence a été
 > ajoutée, avec son test.
 
+## Une seule échelle de score
+
+Le `score` et la `recommandation` suivent un tableau unique, aligné sur les trois
+valeurs que le code accepte :
+
+| Score | `recommandation` |
+|---|---|
+| 60–100 | `postuler` |
+| 40–59 | `postuler_si_peu_options` |
+| 0–39 | `ne_pas_postuler` |
+
+> Le prompt en contenait **deux, contradictoires** jusqu'au 23/07/2026 : pour un
+> score de 55, l'une disait « postuler si peu d'options », l'autre « non
+> pertinent ». Le modèle tranchait au hasard. Une consigne ambiguë ne produit pas
+> une réponse prudente, elle produit une réponse arbitraire.
+
 ## Le coût, tenu court
 
 Un bouton se presse vite sur un téléphone. Deux mesures :

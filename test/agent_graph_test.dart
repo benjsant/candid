@@ -153,6 +153,34 @@ void main() {
     expect(run.error, isNotNull);
     expect(run.output.recommandation, 'ne_pas_postuler');
   });
+
+  group('ce qu\'on envoie au modèle', () {
+    // Le prompt système interdit le tiret cadratin. Si les messages que NOUS
+    // envoyons en contiennent, le modèle voit une consigne contredite par
+    // l'exemple, et l'imitation l'emporte souvent sur l'instruction.
+    test('aucun tiret cadratin dans le message utilisateur', () {
+      const offer = AgentOffer(
+        title: 'Développeur',
+        company: 'ACME',
+        description: 'Python, FastAPI.',
+      );
+      final msg = buildUserMessage(offer, '{}');
+      expect(msg.contains('—'), isFalse, reason: 'cadratin');
+      expect(msg.contains('–'), isFalse, reason: 'demi-cadratin');
+    });
+
+    test('ni dans le message de candidature spontanée', () {
+      const offer = AgentOffer(
+        title: 'Développeur',
+        company: 'ACME',
+        description: 'Entreprise qui recrute.',
+        spontaneous: true,
+      );
+      final msg = buildUserMessage(offer, '{}');
+      expect(msg.contains('—'), isFalse);
+      expect(msg, contains('candidature-spontanee'));
+    });
+  });
 }
 
 class _ThrowingLlm implements LlmGateway {

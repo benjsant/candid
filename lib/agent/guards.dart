@@ -32,7 +32,8 @@ String noDash(String? text) => (text ?? '')
 final _accrocheCliches = <(RegExp, String)>[
   (RegExp(r'dynamique et motiv'), 'formule creuse « dynamique et motivé »'),
   (RegExp(r'depuis (mon plus jeune âge|toujours)'), 'cliché « depuis toujours »'),
-  (RegExp(r'passionn[ée]'), 'cliché « passionné »'),
+  (RegExp(r'passionn[ée]|\bma passion\b|\bpassion pour\b'),
+      'cliché « passionné » / « ma passion »'),
   (RegExp(r'candidat id[ée]al'), 'formule « candidat idéal »'),
   (RegExp(r"n'h[ée]sitez pas"), 'formule « n\'hésitez pas »'),
   (RegExp(r'je vous [ée]cris pour le poste'),

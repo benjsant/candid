@@ -33,6 +33,16 @@ void main() {
       expect(checkAccroche(ok), isEmpty);
     });
 
+    test('le nom « passion » est un cliché autant que l\'adjectif', () {
+      // Constaté en production le 23/07/2026 : « fait écho à ma passion pour
+      // les pipelines » passait le juge, alors que « je suis passionné » était
+      // rejeté. Le motif ne couvrait que l'adjectif.
+      expect(checkAccroche('Votre projet fait écho à ma passion pour la data.'),
+          isNotEmpty);
+      expect(checkAccroche('Une passion pour les pipelines de données.'),
+          isNotEmpty);
+    });
+
     test('les clichés sont détectés', () {
       expect(checkAccroche('Je suis dynamique et motivé.'),
           contains('formule creuse « dynamique et motivé »'));
