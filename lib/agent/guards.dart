@@ -7,10 +7,24 @@ library;
 
 import 'models.dart';
 
+/// Plage de nombres : un demi-cadratin **collé entre deux chiffres**
+/// (« 80–100 », « 2016–2019 »). C'est une écriture correcte en français, pas un
+/// tic d'IA : elle ne doit pas devenir une virgule.
+final _numRangeRe = RegExp(r'(?<=[0-9])[—–](?=[0-9])');
+
+/// Tiret cadratin ou demi-cadratin employé comme **ponctuation**. C'est celui-là
+/// qui trahit une rédaction par IA.
 final _dashRe = RegExp(r'\s*[—–]\s*');
 
-/// Anti tiret cadratin (—/–) : virgule à la place. Ne touche pas au « - ».
-String noDash(String? text) => (text ?? '').replaceAll(_dashRe, ', ');
+/// Sentinelle interne : un caractère qui n'apparaît jamais dans un texte rédigé.
+const _rangeMark = '￿';
+
+/// Anti tiret cadratin (—/–) : virgule à la place. Ne touche ni au « - », ni aux
+/// plages de nombres, qui sont mises à l'abri le temps du remplacement.
+String noDash(String? text) => (text ?? '')
+    .replaceAll(_numRangeRe, _rangeMark)
+    .replaceAll(_dashRe, ', ')
+    .replaceAll(_rangeMark, '–');
 
 /// Motifs rejetés dans l'accroche (§5) : formules creuses, superlatifs gratuits,
 /// ouverture banale, exagération géographique. Le tiret cadratin et la longueur
@@ -39,7 +53,10 @@ List<String> checkAccroche(String? text) {
     for (final (pat, label) in _accrocheCliches)
       if (pat.hasMatch(low)) label,
   ];
-  if (t.contains('—') || t.contains('–')) {
+  // Même règle que `noDash` : une plage de nombres (« 2016–2019 ») est correcte,
+  // seul le tiret de ponctuation trahit une rédaction IA. Sans cette exception,
+  // le juge rejetterait une accroche que le nettoyage laisse pourtant passer.
+  if (t.replaceAll(_numRangeRe, '').contains(RegExp(r'[—–]'))) {
     problems.add('tiret cadratin (marqueur IA)');
   }
   final nSent =

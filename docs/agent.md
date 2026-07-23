@@ -57,8 +57,14 @@ négociables.
 
 ### `noDash`
 
-Retire les tirets cadratins des textes générés. Ils signent le texte de machine,
-et le projet Docker les bannissait déjà.
+Remplace par une virgule les tirets cadratins et demi-cadratins employés comme
+**ponctuation** : ils signent le texte de machine.
+
+Une **plage de nombres** collée entre deux chiffres (« 80–100 », « 2016–2019 »)
+est en revanche une écriture correcte en français, et elle est préservée. Le
+juge applique exactement la même règle : sans cette exception, il rejetterait
+une accroche que le nettoyage laisse pourtant intacte, et la boucle de
+régénération tournerait trois fois pour rien.
 
 ### `checkAccroche`
 

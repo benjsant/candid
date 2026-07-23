@@ -59,7 +59,15 @@ final _accrocheRe = RegExp(r'\[Accroche.*?\]', dotAll: true);
 final _subjectRe = RegExp(r'^\s*Objet\s*:\s*(.+)$', multiLine: true);
 final _subjectLineRe = RegExp(r'^\s*Objet\s*:.*$', multiLine: true);
 final _placeholderRe = RegExp(r'\{\{\s*([\w.]+)\s*\}\}');
+/// Plage de nombres collée entre deux chiffres (« 2016–2019 ») : écriture
+/// correcte en français, préservée telle quelle.
+final _numRangeRe = RegExp(r'(?<=[0-9])[—–](?=[0-9])');
+
+/// Tiret employé comme ponctuation : c'est celui-là qui trahit une IA.
 final _dashRe = RegExp(r'\s*[—–]\s*');
+
+/// Sentinelle interne, absente de tout texte rédigé.
+const _rangeMark = '￿';
 final _blankLinesRe = RegExp(r'\n{3,}');
 
 /// Retire les blocs de commentaire HTML (entête + « ton de référence »).
@@ -80,7 +88,10 @@ String substitute(String text, LetterVars vars) {
 
 /// Garde-fou anti-IA : remplace les tirets cadratin (—) et demi-cadratin (–)
 /// par « , ». On ne touche PAS au trait d'union simple « - ».
-String noDash(String s) => s.replaceAll(_dashRe, ', ');
+String noDash(String s) => s
+    .replaceAll(_numRangeRe, _rangeMark)
+    .replaceAll(_dashRe, ', ')
+    .replaceAll(_rangeMark, '–');
 
 /// Assemble le template en objet + corps.
 ///

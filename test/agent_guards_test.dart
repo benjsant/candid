@@ -43,13 +43,51 @@ void main() {
     });
 
     test('le tiret cadratin est un défaut (marqueur IA)', () {
-      expect(checkAccroche('Un fait — vérifiable.'),
+      expect(checkAccroche('Un fait \u2014 vérifiable.'),
           contains('tiret cadratin (marqueur IA)'));
+    });
+
+    test('une plage de nombres ne fait pas rejeter l\u2019accroche', () {
+      // Le juge doit appliquer la même règle que noDash, sinon il rejette une
+      // accroche que le nettoyage laisserait pourtant intacte : la boucle de
+      // régénération tournerait pour rien, trois fois.
+      const ok = 'Votre équipe a doublé ses effectifs entre 2016\u20132019. '
+          'Vos travaux sur les pipelines recoupent mes projets ETL.';
+      expect(checkAccroche(ok), isEmpty);
     });
 
     test('une accroche trop longue (> 4 phrases) est rejetée', () {
       const long = 'Un. Deux. Trois. Quatre. Cinq.';
       expect(checkAccroche(long).any((p) => p.contains('trop long')), isTrue);
+    });
+  });
+
+  group('noDash et les plages de nombres', () {
+    test('le tiret de ponctuation devient une virgule', () {
+      expect(noDash('Python, 3 ans d\u2019expérience \u2014 en autonomie'),
+          'Python, 3 ans d\u2019expérience, en autonomie');
+      expect(noDash('mot\u2014mot'), 'mot, mot');
+    });
+
+    test('une plage de nombres est préservée', () {
+      // « 80–100 » et « 2016–2019 » sont une écriture correcte en français,
+      // pas un tic d'IA. Les transformer en « 80, 100 » changerait le sens.
+      expect(noDash('score 80\u2013100'), 'score 80\u2013100');
+      expect(noDash('CAF du Nord, 2016\u20132019'), 'CAF du Nord, 2016\u20132019');
+    });
+
+    test('les deux cas dans la même phrase', () {
+      expect(noDash('de 2016\u20132019 \u2014 six mois cumulés'),
+          'de 2016\u20132019, six mois cumulés');
+    });
+
+    test('des dates séparées par des espaces restent de la ponctuation', () {
+      // Espaces autour : c'est un tiret de ponctuation, pas une plage collée.
+      expect(noDash('mai 2016 \u2013 mai 2019'), 'mai 2016, mai 2019');
+    });
+
+    test('le trait d\u2019union ordinaire n\u2019est jamais touché', () {
+      expect(noDash('mini-projet, bien-être'), 'mini-projet, bien-être');
     });
   });
 

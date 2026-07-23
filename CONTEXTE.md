@@ -123,6 +123,16 @@ un peu moins par appareil.
 
 ## Journal
 
+- **23/07/2026** : passe de relecture typographique. 39 tirets cadratins traînaient
+  dans la documentation, et **16 dans le prompt système lui-même**, alors que
+  celui-ci les interdit à la ligne 154 : le modèle voyait une consigne contre
+  seize contre-exemples, et le comportement few-shot l'emporte souvent sur
+  l'instruction. Nettoyés. Au passage, la règle était trop large : « 80–100 » et
+  « 2016–2019 » sont une ponctuation correcte en français. `noDash` et
+  `checkAccroche` préservent désormais les plages collées entre deux chiffres,
+  et la règle du prompt le dit. Leçon : une règle qu'on énonce sans l'appliquer
+  soi-même s'enseigne à l'envers.
+
 - **22/07/2026 (soir)** : étape 7, premier item. Les entreprises « à démarcher »
   de LBA (~194) étaient collectées puis jetées : elles sont maintenant en base
   et dans un onglet dédié. Trois points. (1) **Première migration de schéma avec
