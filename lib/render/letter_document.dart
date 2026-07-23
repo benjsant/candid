@@ -49,8 +49,13 @@ pw.Document buildLetterDocument(
   doc.addPage(
     pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
+      // Marges de courrier : 22 mm de côté, 20 mm haut/bas. Elles étaient
+      // divisées par 10 (2,2 mm), ce qui donnait une lettre au texte collé au
+      // bord de la feuille. Voir le même correctif dans `cv_document.dart`.
       margin: const pw.EdgeInsets.symmetric(
-          horizontal: 22 * PdfPageFormat.mm / 10, vertical: 20 * PdfPageFormat.mm / 10),
+        horizontal: 22 * PdfPageFormat.mm,
+        vertical: 20 * PdfPageFormat.mm,
+      ),
       build: (context) => [
         // Expéditeur.
         pw.Text(senderName,
@@ -121,8 +126,12 @@ List<pw.Widget> _body(String body) {
     } else {
       widgets.add(pw.Padding(
         padding: const pw.EdgeInsets.only(top: 2, bottom: 2),
+        // Aligné à gauche, et non justifié. La justification suppose une
+        // césure pour répartir le blanc ; le paquet `pdf` n'en fait pas, ce qui
+        // creusait des « rivières » entre les mots sur les lignes courtes
+        // (« Disponible   immédiatement   et   mobile »). Le drapeau est plus
+        // régulier, et parfaitement admis dans un courrier professionnel.
         child: pw.Text(line,
-            textAlign: pw.TextAlign.justify,
             style: pw.TextStyle(fontSize: 10.5, color: _C.ink, lineSpacing: 1.6)),
       ));
     }

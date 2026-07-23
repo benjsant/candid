@@ -33,11 +33,16 @@ class OffersRepository {
 
   final AppDatabase _db;
 
-  /// Cherche une offre déjà connue qui serait la même, venue d'une autre
-  /// source. La comparaison se fait en Dart et non en SQL : `canonTitle` et
-  /// `canonCity` ne sont pas exprimables en SQLite sans dupliquer leur logique,
-  /// et le nombre d'offres à parcourir se compte en centaines.
-  Future<Offer?> _findCrossSourceDuplicate({
+  /// Ce qu'il faut connaître d'une offre déjà en base pour la comparer, et
+  /// rien de plus.
+  ///
+  /// La comparaison se fait en Dart et non en SQL : `canonTitle` et `canonCity`
+  /// ne sont pas exprimables en SQLite sans dupliquer leur logique. Mais charger
+  /// les lignes **entières** serait coûteux : la description d'une offre France
+  /// Travail pèse environ 2,4 ko, et cette requête repart à chaque
+  /// enregistrement. Sur une collecte de 150 offres avec 125 déjà en base, cela
+  /// représentait une quarantaine de mégaoctets de texte alloués pour rien.
+  Future<({int id, int? score})?> _findCrossSourceDuplicate({
     required String source,
     required String title,
     String? company,
@@ -49,20 +54,24 @@ class OffersRepository {
       company: company,
       location: location,
     );
-    // On ne compare qu'aux offres des AUTRES sources : la règle les exige
-    // différentes, autant ne pas charger le reste.
-    final others = await (_db.select(_db.offers)
-          ..where((o) => o.source.equals(source).not()))
-        .get();
 
-    for (final o in others) {
+    final t = _db.offers;
+    // On ne compare qu'aux offres des AUTRES sources (la règle les exige
+    // différentes), et on ne lit que les cinq colonnes qui servent.
+    final query = _db.selectOnly(t)
+      ..addColumns([t.id, t.source, t.title, t.company, t.location, t.score])
+      ..where(t.source.equals(source).not());
+
+    for (final row in await query.get()) {
       final existing = DedupCandidate(
-        source: o.source,
-        title: o.title,
-        company: o.company,
-        location: o.location,
+        source: row.read(t.source) ?? '',
+        title: row.read(t.title) ?? '',
+        company: row.read(t.company),
+        location: row.read(t.location),
       );
-      if (isCrossSourceDuplicate(candidate, existing)) return o;
+      if (isCrossSourceDuplicate(candidate, existing)) {
+        return (id: row.read(t.id)!, score: row.read(t.score));
+      }
     }
     return null;
   }

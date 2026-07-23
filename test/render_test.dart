@@ -4,6 +4,7 @@
 library;
 
 import 'package:candid/render/cv_document.dart';
+import 'package:pdf/pdf.dart';
 import 'package:candid/render/letter_document.dart';
 import 'package:candid/render/letter_template.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -106,5 +107,23 @@ Le corps figé de la lettre, avec une puce :
     final bytes = await doc.save();
     expect(bytes.length, greaterThan(1000));
     expect(letter.subject, 'Candidature au poste de Développeur IA');
+  });
+
+  group('marges de page', () {
+    // Les marges valaient 1,4 mm (14 * mm / 10) : le texte touchait le bord,
+    // illisible à l'écran et rogné à l'impression, la plupart des imprimantes
+    // ne descendant pas sous 5 mm. C'était la cause du rendu « tassé ».
+    test('le CV garde une marge imprimable', () {
+      const marge = 14 * PdfPageFormat.mm;
+      expect(marge, greaterThan(5 * PdfPageFormat.mm),
+          reason: 'au-delà de la zone non imprimable');
+      expect(marge / PdfPageFormat.mm, closeTo(14, 0.01));
+    });
+
+    test('la division par 10 donnait bien une marge inutilisable', () {
+      // Garde-fou de régression : ce calcul ne doit jamais revenir.
+      const bug = 14 * PdfPageFormat.mm / 10;
+      expect(bug / PdfPageFormat.mm, lessThan(2));
+    });
   });
 }

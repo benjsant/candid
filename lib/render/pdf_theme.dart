@@ -9,6 +9,13 @@ library;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/widgets.dart' as pw;
 
+/// Interligne supplémentaire, en points, ajouté entre deux lignes de texte.
+///
+/// Le paquet `pdf` colle les lignes par défaut. Sur un CV dense, cela produit
+/// des paragraphes en bloc, pénibles à parcourir en diagonale, ce que fait
+/// pourtant tout recruteur. 1,8 pt suffit à aérer sans coûter une page.
+const kPdfLineSpacing = 1.8;
+
 /// Charge le thème une fois ; à réutiliser pour tous les rendus d'une session.
 Future<pw.ThemeData> loadPdfTheme() async {
   final regular = pw.Font.ttf(
@@ -17,5 +24,15 @@ Future<pw.ThemeData> loadPdfTheme() async {
       pw.Font.ttf(await rootBundle.load('assets/fonts/LiberationSans-Bold.ttf'));
   // Pas d'italique embarqué : ni le CV ni la lettre n'en utilisent. À rajouter
   // (LiberationSans-Italic.ttf) le jour où un rendu en aura besoin.
-  return pw.ThemeData.withFont(base: regular, bold: bold);
+  final theme = pw.ThemeData.withFont(base: regular, bold: bold);
+
+  // L'interligne est posé sur le style par défaut : les styles locaux
+  // (`pw.TextStyle(fontSize: …)`) en héritent sans avoir à le répéter partout.
+  return theme.copyWith(
+    defaultTextStyle:
+        theme.defaultTextStyle.copyWith(lineSpacing: kPdfLineSpacing),
+    paragraphStyle:
+        theme.paragraphStyle.copyWith(lineSpacing: kPdfLineSpacing),
+    bulletStyle: theme.bulletStyle.copyWith(lineSpacing: kPdfLineSpacing),
+  );
 }

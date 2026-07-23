@@ -37,6 +37,15 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+
+            // R8 supprime ce qu'il croit mort. Or WorkManager et Room passent
+            // par la réflexion : sans ces règles, l'application compile puis
+            // plante au lancement (voir proguard-rules.pro pour la trace).
+            // Un build debug ne le montre jamais, il n'est pas minifié.
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

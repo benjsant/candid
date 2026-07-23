@@ -169,7 +169,18 @@ pw.Document buildCvDocument(CvData data,
   doc.addPage(
     pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.symmetric(horizontal: 14 * PdfPageFormat.mm / 10, vertical: 8 * PdfPageFormat.mm / 10),
+      // 14 mm de côté, 10 mm haut/bas. Ces valeurs étaient divisées par 10 par
+      // erreur (1,4 mm), ce qui collait le texte au bord : illisible à l'écran,
+      // et rogné à l'impression (la plupart des imprimantes ne descendent pas
+      // sous 5 mm). C'était la cause principale du rendu « tassé ».
+      //
+      // 10 mm en vertical plutôt que 14 : un CV est dense par nature, et ces
+      // 8 mm regagnés font tenir le profil complet sur une page. On reste au
+      // double de la zone non imprimable.
+      margin: const pw.EdgeInsets.symmetric(
+        horizontal: 14 * PdfPageFormat.mm,
+        vertical: 10 * PdfPageFormat.mm,
+      ),
       build: (context) => [
         // En-tête.
         pw.Text(name,
@@ -297,10 +308,13 @@ class _SkillRow {
 
 pw.Widget _section(String heading, List<pw.Widget> children) {
   return pw.Padding(
-    padding: const pw.EdgeInsets.only(top: 7),
+    // Espacement resserré depuis que les marges de page sont correctes : la
+    // respiration vient désormais des marges, plus besoin de la reprendre entre
+    // chaque section. Cela évite qu'un titre se retrouve seul en bas de page.
+    padding: const pw.EdgeInsets.only(top: 5),
     child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
       pw.Container(
-        margin: const pw.EdgeInsets.only(bottom: 4),
+        margin: const pw.EdgeInsets.only(bottom: 3),
         padding: const pw.EdgeInsets.only(bottom: 2),
         decoration: pw.BoxDecoration(
           border: pw.Border(bottom: pw.BorderSide(color: _C.rule, width: 1.5)),
