@@ -123,6 +123,20 @@ un peu moins par appareil.
 
 ## Journal
 
+- **23/07/2026 (soir)** : bug critique trouvé en testant le PREMIER vrai build
+  release. Flutter n'ajoute la permission INTERNET qu'aux manifestes `debug/` et
+  `profile/`, jamais au manifeste principal. Le release n'avait donc AUCUN accès
+  réseau : ni collecte, ni agent, ni résolution de commune. Invisible pendant
+  tout le développement (tests sur debug). Leçon : l'audit de sécurité et les
+  vérifications réseau doivent se faire sur un build RELEASE, pas debug. Ma doc
+  de sécurité annonçait « 7 permissions dont INTERNET » à partir d'un APK debug
+  installé à ce moment : c'était faux pour le livrable. Corrigé.
+- **23/07/2026** : au même moment, deux autres corrections release. (1) Crash au
+  lancement : R8 supprimait le constructeur que WorkManager instancie par
+  réflexion (proguard-rules.pro). (2) Rendu PDF : marges divisées par 10 par
+  erreur (1,4 mm au lieu de 14). Les deux étaient masqués par le build debug.
+
+
 - **23/07/2026 (après-midi)** : passe de précision sur le prompt système, après
   relecture ligne à ligne. Six incohérences trouvées, toutes vérifiées contre le
   code avant correction. (1) **Deux échelles de score contradictoires** : pour 55,
