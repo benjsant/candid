@@ -37,6 +37,11 @@ class _SearchProfileScreenState extends State<SearchProfileScreen> {
   final List<Commune> _selected = [];
   List<Commune> _suggestions = const [];
   bool _searching = false;
+
+  /// Vrai après une recherche qui n'a rien rendu. Sans ce drapeau, l'écran
+  /// restait muet : l'utilisateur tapait une ville, appuyait sur la loupe, et
+  /// il ne se passait rien de visible. Le silence est le pire retour possible.
+  bool _searchedInVain = false;
   bool _loading = true;
 
   static const _seniorities = {
@@ -87,16 +92,36 @@ class _SearchProfileScreenState extends State<SearchProfileScreen> {
   }
 
   Future<void> _lookup(String query) async {
-    setState(() => _searching = true);
+    setState(() {
+      _searching = true;
+      _searchedInVain = false;
+    });
     final results = await searchCommunes(query);
     if (!mounted) return;
     setState(() {
       _suggestions = results;
       _searching = false;
+      _searchedInVain = results.isEmpty && query.trim().length >= 2;
     });
   }
 
   Future<void> _save() async {
+    // Une ville tapée mais jamais choisie dans la liste n'est PAS retenue :
+    // seule la sélection remplit `_selected`. Enregistrer sans le dire ferait
+    // croire à un profil ciblé alors que la collecte ratisserait la France.
+    if (_commune.text.trim().isNotEmpty &&
+        !_selected.any((c) => c.label == _commune.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('« ${_commune.text.trim()} » n\'est pas encore '
+              'retenue : appuyez sur la loupe, puis sur la ville dans la '
+              'liste.'),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+      return;
+    }
+
     final communes = ProfileCommunes(
       _selected.map((c) => c.label).toList(),
       _selected.map((c) => c.inseeCode).toList(),
@@ -165,8 +190,29 @@ class _SearchProfileScreenState extends State<SearchProfileScreen> {
                   ),
                   onSubmitted: _lookup,
                 ),
+                if (_searchedInVain)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(
+                      children: [
+                        Icon(Icons.search_off,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.error),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Aucune commune trouvée. Vérifiez l\'orthographe, '
+                            'ou votre connexion.',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 if (_suggestions.isNotEmpty) ...[
                   const SizedBox(height: 8),
+                  Text('Appuyez sur une commune pour la retenir :',
+                      style: Theme.of(context).textTheme.bodySmall),
                   ..._suggestions.map(
                     (c) => ListTile(
                       dense: true,

@@ -1,4 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- INDISPENSABLE. Flutter n'ajoute cette permission qu'aux manifestes
+         debug/ et profile/ automatiquement, JAMAIS au manifeste principal. Sans
+         cette ligne, le build RELEASE n'a aucun accès réseau : ni collecte, ni
+         agent, ni résolution de commune. Le bug est invisible en debug (où la
+         permission est injectée), et n'apparaît que sur le vrai livrable.
+         Constaté le 23/07/2026 : recherche de commune muette en release. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Android 13+ exige une permission explicite pour notifier. Refusée, la
          collecte tourne quand même : elle est simplement muette. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
