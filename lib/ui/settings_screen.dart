@@ -63,6 +63,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   final _notifications = Notifications();
 
+  /// Ouvert UNE fois. Créer ce stream dans `build()` en rouvrirait un nouveau à
+  /// chaque `setState` (bascule de thème, de collecte…), laissant fuir l'ancien.
+  late final Stream<SearchProfile?> _profileStream =
+      widget.profiles.watchActive();
+
   Future<void> _setWeeklyDigest(bool enabled) async {
     if (enabled) {
       await _notifications.init();
@@ -187,7 +192,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Text('Recherche', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         StreamBuilder<SearchProfile?>(
-          stream: widget.profiles.watchActive(),
+          stream: _profileStream,
           builder: (context, snapshot) {
             final profile = snapshot.data;
             final communes = ProfileCommunes.parse(

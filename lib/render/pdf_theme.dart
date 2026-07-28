@@ -16,8 +16,20 @@ import 'package:pdf/widgets.dart' as pw;
 /// pourtant tout recruteur. 1,8 pt suffit à aérer sans coûter une page.
 const kPdfLineSpacing = 1.8;
 
-/// Charge le thème une fois ; à réutiliser pour tous les rendus d'une session.
-Future<pw.ThemeData> loadPdfTheme() async {
+/// Le thème, chargé une seule fois par session.
+///
+/// Les deux polices pèsent ~800 ko et leur décodage n'est pas gratuit. Le
+/// résultat étant identique à chaque rendu, on mémorise le `Future` : le
+/// premier aperçu paie la lecture, les suivants la retrouvent instantanément.
+/// On garde le `Future` (et non la valeur résolue) pour que deux aperçus
+/// lancés coup sur coup partagent la même lecture au lieu d'en déclencher deux.
+Future<pw.ThemeData>? _cachedTheme;
+
+/// Charge le thème PDF (police embarquée + interligne). Mémorisé : un seul
+/// décodage de police pour toute la session, quel que soit le nombre d'aperçus.
+Future<pw.ThemeData> loadPdfTheme() => _cachedTheme ??= _buildPdfTheme();
+
+Future<pw.ThemeData> _buildPdfTheme() async {
   final regular = pw.Font.ttf(
       await rootBundle.load('assets/fonts/LiberationSans-Regular.ttf'));
   final bold =
