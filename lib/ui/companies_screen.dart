@@ -2,7 +2,7 @@
 ///
 /// L'écran répète en toutes lettres ce que ces fiches sont, et ce qu'elles ne
 /// sont pas : **aucune offre n'est publiée**. C'est le même contrat que partout
-/// ailleurs dans Candid — on ne laisse pas croire qu'il y a un poste ouvert.
+/// ailleurs dans Candid : on ne laisse pas croire qu'il y a un poste ouvert.
 ///
 /// Et comme partout, rien n'est envoyé : les boutons ouvrent le composeur mail
 /// ou le téléphone, l'utilisateur écrit et envoie lui-même.

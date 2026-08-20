@@ -36,7 +36,7 @@ parité). Contrat central : ne jamais broder, ne rien envoyer sans l'utilisateur
   vérifié sur appareil. Mode clair/sombre manuel + sélecteurs en listes
   déroulantes déjà en place. `pubspec.lock` versionné, `Annotated.hash` retiré.
 - **Étape 4 (l'agent) codée** : `lib/agent/` = models (port schema.py), guards
-  (no_dash, check_accroche, sanitize — non négociables), llm (client
+  (no_dash, check_accroche, sanitize, non négociables), llm (client
   multi-fournisseurs OpenAI-compatible, cache-friendly), research (grounding
   INSEE sans clé), graph (analyze→research→accroche→judge→validate + boucle
   d'auto-correction), agent_config (fournisseur, modèle, plafond 5/jour),
@@ -82,7 +82,7 @@ parité). Contrat central : ne jamais broder, ne rien envoyer sans l'utilisateur
   déjà cette offre ». Base tirée de l'appareil : hash = `sha256('url:'+canonUrl)`
   confirmé, et les index `idx_offers_*` sont bien présents.
 - **`capturesReelles`** : LinkedIn (app), France Travail (app) et WTTJ
-  (navigateur) figés — tous URL seule. Indeed = app derrière un mur de connexion
+  (navigateur) figés, tous URL seule. Indeed = app derrière un mur de connexion
   (non contourné, on ne crée pas de compte). Reste HelloWork.
 - **Découverte 20/07 (soir) : `EXTRA_SUBJECT`.** Le partage navigateur affiche
   le titre de page dans la feuille système, mais ce titre part dans
@@ -224,7 +224,7 @@ un peu moins par appareil.
   et index `idx_offers_*` confirmés depuis la base de l'appareil. Bloquant
   « build en retard » levé. Étape 2 close. Petite scorie notée : `Annotated.hash`
   n'est plus lu par le repository depuis `dedupHash` (calcul SHA256 inutile à
-  chaque save) — à nettoyer un jour, sans urgence.
+  chaque save), à nettoyer un jour, sans urgence.
 - **20/07/2026** : test de bout en bout de l'étape 2 sur l'Oppo (LinkedIn +
   France Travail). Constat URL-seule confirmé. `dedupHash` ajouté (dédup sur
   l'URL, repli titre+entreprise), fixtures réelles figées, PLAN/TASKS mis à

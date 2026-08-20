@@ -50,8 +50,8 @@ flutter run           # sur un appareil branché en USB
 ```
 
 C'est tout. Vérifié sur un clone vierge : `flutter pub get`, `flutter test`
-(182 verts) puis `flutter build apk --release` produisent un APK — permission
-INTERNET comprise — **sans aucune étape manuelle ni fichier local**. Le wrapper
+(182 verts) puis `flutter build apk --release` produisent un APK (permission
+INTERNET comprise) **sans aucune étape manuelle ni fichier local**. Le wrapper
 Gradle et `android/local.properties` sont régénérés par Flutter, c'est normal
 qu'ils soient absents du dépôt.
 

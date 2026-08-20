@@ -83,7 +83,7 @@ List<Map<String, dynamic>> _list(Object? v) => v is List
     ? v.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList()
     : const [];
 
-/// France Travail : `{ resultats: [...] }` — Offres d'emploi v2
+/// France Travail : `{ resultats: [...] }`, Offres d'emploi v2
 /// `/offres/search`.
 List<NormalizedOffer> normalizeFranceTravail(Map<String, dynamic>? payload) {
   return _list(payload?['resultats']).map((r) {
@@ -101,7 +101,7 @@ List<NormalizedOffer> normalizeFranceTravail(Map<String, dynamic>? payload) {
   }).toList();
 }
 
-/// La Bonne Alternance — volet `jobs` (offres d'alternance publiées).
+/// La Bonne Alternance, volet `jobs` (offres d'alternance publiées).
 ///
 /// Forme vérifiée sur un vrai appel côté Docker (28/06/2026) et verrouillée par
 /// des fixtures. Note reprise de `sources.mjs` : les offres partenaires (issues
@@ -133,7 +133,7 @@ List<NormalizedOffer> normalizeLaBonneAlternanceJobs(
   }).toList();
 }
 
-/// La Bonne Alternance — volet `recruiters` : des entreprises à fort potentiel
+/// La Bonne Alternance, volet `recruiters` : des entreprises à fort potentiel
 /// d'embauche, sans offre publiée, à contacter en candidature spontanée.
 List<NormalizedRecruiter> normalizeLbaRecruiters(
     Map<String, dynamic>? payload) {

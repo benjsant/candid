@@ -9,7 +9,7 @@
 ///
 /// La tâche tourne dans un **isolat séparé**, qui ne partage rien avec
 /// l'interface : ni base ouverte, ni coffre-fort, ni client HTTP. Tout est
-/// reconstruit ici, puis refermé — une base laissée ouverte verrouillerait le
+/// reconstruit ici, puis refermé : une base laissée ouverte verrouillerait le
 /// fichier pour l'application principale.
 library;
 

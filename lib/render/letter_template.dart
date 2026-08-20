@@ -3,7 +3,7 @@
 ///
 /// Le corps de la lettre est FIGÉ (validé par le candidat) : l'agent ne produit
 /// QUE l'accroche (cf. prompt système §5/§6). Ici on ne fait que coller
-/// l'accroche dans le template et résoudre les `{{placeholders}}` — jamais le
+/// l'accroche dans le template et résoudre les `{{placeholders}}`, jamais le
 /// LLM. C'est un garde-fou : le corps n'est jamais réécrit, la seule zone de
 /// texte libre est l'accroche. La substitution est pure et testée.
 library;

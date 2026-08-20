@@ -2,10 +2,10 @@
 ///
 ///     analyze → research → accroche → judge → (retry ↺ | validate)
 ///
-/// - analyze  : LLM (temp 0.2) — le jugement : score, sous-scores, matching,
+/// - analyze  : LLM (temp 0.2), le jugement : score, sous-scores, matching,
 ///              personnalisation_cv, conseils, objet (tout le §6 sauf la lettre).
 /// - research : grounding INSEE (faits officiels), sans LLM.
-/// - accroche : LLM (temp 0.7) — le créatif : template + accroche, ancrée sur
+/// - accroche : LLM (temp 0.7), le créatif : template + accroche, ancrée sur
 ///              les faits du registre.
 /// - judge    : garde-fous déterministes (`checkAccroche`), sans LLM.
 /// - validate : fusion déterministe + garde-fous anti-invention, sans LLM.

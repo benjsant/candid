@@ -65,7 +65,7 @@ assets se lisent.
 - [ ] Lors du test sur appareil : capturer les textes **réellement** partagés
       et les figer en fixtures dans `test/shared_text_test.dart` (harnais
       `capturesReelles`). Fait : LinkedIn (app, 19/07), France Travail (app,
-      20/07), WTTJ (navigateur, 20/07) — **tous URL seule**. Enseignement
+      20/07), WTTJ (navigateur, 20/07), **tous URL seule**. Enseignement
       transversal : même le navigateur n'envoie que l'URL dans `EXTRA_TEXT`, le
       titre de page part dans `EXTRA_SUBJECT` non lu (piste PLAN : le lire en
       natif). Les regex « Titre chez Entreprise » ne se déclenchent donc sur
@@ -128,7 +128,7 @@ l'entreprise.
 ✅ Vérifié de bout en bout sur appareil (Oppo, 21/07/2026), clé DeepSeek réelle,
 offre « Developpeur IA Junior chez Doctolib » (score local 82) : l'agent répond
 en ~20 s, score 85/100, recommandation « À postuler », compteur passé à 1/5.
-L'accroche cite « Doctolib révolutionne l'accès aux soins **depuis 2013** » —
+L'accroche cite « Doctolib révolutionne l'accès aux soins **depuis 2013** »,
 fait recoupé avec le registre (`date_creation: 2013-07-15`), donc vérifiable et
 non inventé. Aucun tiret cadratin. La lettre reprend l'accroche et le corps
 figé ; le CV ciblé est réordonné (Job Hunter en tête).
@@ -184,7 +184,7 @@ partage (Drive, Gmail, fichiers).
 - [x] `lib/sources/collect_service.dart` + bouton « Collecter » **faits**.
       ✅ Vérifié en réel sur appareil (Oppo, 21/07/2026) avec les identifiants
       France Travail : **150 offres collectées**, scores de 12 à 92. Second
-      appui : 157 offres en base pour 157 hash distincts, **zéro doublon** —
+      appui : 157 offres en base pour 157 hash distincts, **zéro doublon**,
       critère d'acceptation de l'étape tenu. 72 offres sans entreprise
       (anonymisées à la source) : champ laissé vide, jamais comblé.
 - [x] **Profil de recherche fait** (`profile_repository.dart`,
@@ -242,7 +242,7 @@ partage (Drive, Gmail, fichiers).
 notification arrive sans ouvrir l'application.
 ✅ **Vérifié sur appareil (Oppo ColorOS, 22/07/2026).** Collecte de fond
 déclenchée application fermée, écran d'accueil : notification reçue,
-« **19 nouvelles offres — 3 dépassent 75/100** ». Base intacte après coup :
+« **19 nouvelles offres, 3 dépassent 75/100** ». Base intacte après coup :
 125 offres, zéro doublon de hash, l'isolat a bien refermé le fichier.
 
 Deux constats sur le comportement d'Android, relevés dans les logs :
@@ -264,7 +264,7 @@ Le bouton de collecte manuelle reste la voie fiable, et l'écran le dit.
       l'examen des 125 offres réellement collectées montre que « même titre »
       ne veut pas dire « même offre » (trois « Data manager » chez NEW NET 3D,
       ADECCO et LE CABRH). Une similarité large aurait **masqué de vraies
-      offres** — le coût d'une erreur est asymétrique. La règle exige donc
+      offres** : le coût d'une erreur est asymétrique. La règle exige donc
       simultanément : sources différentes, même titre canonicalisé, même ville,
       entreprises compatibles (identiques ou l'une vide).
       Validée contre les 125 offres réelles : **1 seule paire rapprochée**,
@@ -282,7 +282,7 @@ Le bouton de collecte manuelle reste la voie fiable, et l'écran le dit.
       le 22/07/2026). `companies_repository.dart` + onglet « À démarcher ».
       Dédup par **SIRET** d'abord (deux établissements peuvent porter le même
       nom), nom en repli. Une fiche modifiée à la main n'est jamais écrasée par
-      une collecte. **Garde-fou testé : aucun poste n'est fabriqué** — ni titre,
+      une collecte. **Garde-fou testé : aucun poste n'est fabriqué** : ni titre,
       ni description, et rien n'atterrit dans la boîte aux offres. L'écran le
       dit en toutes lettres.
       Schéma **v2** : `companies` gagne siret, location, source. Première
@@ -291,7 +291,7 @@ Le bouton de collecte manuelle reste la voie fiable, et l'écran le dit.
       1 candidature, 1 profil intacts).
       ✅ Vérifié en réel : 194 entreprises collectées, toutes avec SIRET et
       secteur, **aucune avec description**. Contacts réellement disponibles :
-      lien LBA 194/194, téléphone 59/194, email 0/194 — l'écran n'affiche que
+      lien LBA 194/194, téléphone 59/194, email 0/194 : l'écran n'affiche que
       les boutons possibles.
 - [ ] Import ponctuel de l'historique depuis le dump PostgreSQL (non demandé)
       (`/mnt/Data/Dev/migration-n8n/db/`)

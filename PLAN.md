@@ -171,7 +171,7 @@ le moins de valeur. Le partage est simple à implémenter et transforme l'usage.
 
 **Constat vérifié sur appareil (20/07/2026)** : les apps officielles LinkedIn ET
 France Travail (Parcours Emploi) ne partagent **qu'une URL nue**, sans titre ni
-entreprise — et le **partage navigateur** (WTTJ via DuckDuckGo, vérifié aussi le
+entreprise, et le **partage navigateur** (WTTJ via DuckDuckGo, vérifié aussi le
 20/07) fait pareil du point de vue de Candid. Le parseur détecte bien la source
 depuis l'URL et, fidèle à la règle « ne brode jamais », admet l'inconnue et
 demande à l'utilisateur de compléter titre + entreprise, au lieu d'inventer.

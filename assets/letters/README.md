@@ -1,8 +1,8 @@
-# assets/letters/ — modèles de lettres de motivation
+# assets/letters/ : modèles de lettres de motivation
 
 Modèles **quasi-complets et typés** : le **corps est figé** (texte validé par le
 candidat). L'agent ne fait que **choisir le bon modèle** et rédiger l'**accroche**
-(2-3 phrases : « pourquoi cette entreprise ») — cf. `prompts/agent-system-prompt.md`
+(2-3 phrases : « pourquoi cette entreprise »), cf. `prompts/agent-system-prompt.md`
 §5 et §6 (`lettre: { template, accroche }`).
 
 L'assemblage est **déterministe**, fait par le service de rendu

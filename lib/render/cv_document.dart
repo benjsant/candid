@@ -6,7 +6,7 @@
 /// de l'agent (`highlight_*`, `hidden_*`, résumé sur mesure) sur ce même rendu.
 ///
 /// Garde-fou repris du template : aucun tiret cadratin dans le rendu, et rien
-/// n'est inventé — on n'affiche que ce que portent les `assets/cv/*.json`.
+/// n'est inventé : on n'affiche que ce que portent les `assets/cv/*.json`.
 library;
 
 import 'package:pdf/pdf.dart';
@@ -96,7 +96,7 @@ List<Map<String, dynamic>> _list(Map<String, dynamic> m, String key) =>
 ///
 /// [perso] est la personnalisation de l'agent (étape 4) : titre/résumé sur
 /// mesure, mise en avant et masquage. Elle ne fait QUE réordonner, masquer et
-/// reformuler à partir des données réelles — jamais inventer (les garde-fous de
+/// reformuler à partir des données réelles, jamais inventer (les garde-fous de
 /// `sanitizePersonnalisation` bornent déjà le masquage). Sans elle, on rend le
 /// CV maître tel quel.
 pw.Document buildCvDocument(CvData data,
