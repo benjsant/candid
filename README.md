@@ -45,14 +45,19 @@ Ces règles sont tenues par du code testé (`lib/agent/guards.dart`,
 git clone https://github.com/benjsant/candid.git
 cd candid
 flutter pub get
-flutter test          # 171 tests, doit être vert
+flutter test          # 182 tests, doivent être verts
 flutter run           # sur un appareil branché en USB
 ```
 
-C'est tout. Vérifié sur un clone vierge : `flutter pub get` puis
-`flutter build apk` produisent un APK sans aucune étape manuelle. Le wrapper
+C'est tout. Vérifié sur un clone vierge : `flutter pub get`, `flutter test`
+(182 verts) puis `flutter build apk --release` produisent un APK — permission
+INTERNET comprise — **sans aucune étape manuelle ni fichier local**. Le wrapper
 Gradle et `android/local.properties` sont régénérés par Flutter, c'est normal
 qu'ils soient absents du dépôt.
+
+Ce qui **n'est pas** dans le dépôt, et n'a pas à y être : aucun `.env` (le code
+n'en lit aucun), aucune clé, aucune base de données. Sur la nouvelle machine, il
+suffit de saisir ses clés dans l'écran Réglages au premier lancement.
 
 ### Prérequis
 
@@ -172,9 +177,10 @@ la date et la preuve. Quelques-uns valent d'être lus avant de toucher au code :
 
 ## État
 
-Étapes 1 à 6 **faites et validées sur appareil réel**, étape 7 entamée
-(candidature spontanée, rapprochement inter-sources, digest hebdomadaire).
-171 tests, `flutter analyze` propre.
+Étapes 1 à 7 **faites et validées sur appareil réel** (build release compris) :
+partage, scoring, agent, PDF, suivi, collecte France Travail + La Bonne
+Alternance, candidature spontanée, rapprochement inter-sources, digest
+hebdomadaire. 182 tests, `flutter analyze` propre.
 
 ## Licence
 
